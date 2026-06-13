@@ -128,6 +128,20 @@ Cloudflare Pages Functions **不支持** Cron Triggers（只有单独部署的 W
 
 > Token 存在 KV 里，不会暴露在代码中。
 
+### ⚠️ 常见问题：KV 绑定和环境变量被"吞"
+
+Cloudflare Pages 的 **Production** 和 **Preview** 部署配置是独立的。每次 push 代码后自动创建的是 Preview 部署，但你可能只配了 Production：
+
+```
+Settings → Functions → KV namespace bindings
+  ↳ 先切到 Preview → 再绑定一次 LINKS
+
+Settings → Environment variables
+  ↳ 先切到 Preview → 再配一次 CRON_SECRET
+```
+
+两个环境都配好就不会吞了。
+
 ## 📡 API 文档
 
 ### `GET /api/links`

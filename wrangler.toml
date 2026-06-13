@@ -1,6 +1,3 @@
 name = "friend-link-system"
 compatibility_date = "2025-12-01"
-# Cloudflare Pages 项目
-# 部署方式：Dashboard → Workers & Pages → Create → Pages → Connect to Git
-# KV、环境变量 全部在 Dashboard 图形化界面中绑定，无需修改此文件
 pages_build_output_dir = "./public"
