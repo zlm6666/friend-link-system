@@ -1,150 +1,167 @@
-# 友链管理系统
+# 🌐 友链管理系统
 
-基于 Cloudflare Pages + Workers Functions + KV 的友情链接申请管理系统。
+> 一个开源的友情链接申请、审核、管理系统，基于 Cloudflare Pages 搭建，**零成本运行**。
 
-## ✨ 功能
+[![GitHub stars](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2Fzlm6666%2Ffriend-link-system&query=stargazers_count&style=flat-square&label=%E2%AD%90%20Stars&color=yellow)](https://github.com/zlm6666/friend-link-system)
+[![MIT License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Deploy with Cloudflare](https://img.shields.io/badge/Deploy%20with-Cloudflare-f38020?style=flat-square&logo=cloudflare)](https://dash.cloudflare.com/)
 
-- 📝 **申请页**（`/`）：表单提交，必填标题/头像/链接/描述，可选 RSS，必须勾选 7 条条款
-- 🔍 **查询页**（`/cheak`）：输入标题或链接，实时查询审核状态（待审/通过/拒绝）
-- 🔐 **管理后台**（`/admin`）：默认账号 `admin` / `123456`，首次登录强制改密
-  - 审核：通过 / 拒绝 / 删除
-  - 邮件配置：Resend API + QQ 邮箱（通过 Resend SMTP 凭据）
-  - 图床配置：审核通过后自动上传到 TuCang 图床
-  - RSS 状态：游标/上次更新时间/手动触发
-  - 修改密码
-- 📡 **RSS 聚合 API**（`/api/rss`）：从已通过友链的 RSS 源轮换拉取，前端直接读 KV 缓存
-- 🔗 **友链列表 API**（`/api/links`）：返回已通过友链的标准化 JSON
+---
 
-## 🗂️ 项目结构
+## ✨ 它能做什么？
 
-```
-friend-link-system/
-├── public/                       # 静态资源（Pages 构建输出）
-│   ├── index.html                # 申请页
-│   ├── cheak.html                # 查询页
-│   └── admin.html                # 管理后台
-├── functions/
-│   └── api/
-│       ├── _utils.js             # 通用工具
-│       ├── _rss_core.js          # RSS 抓取 + 轮换核心
-│       ├── submit.js             # POST /api/submit
-│       ├── status.js             # GET  /api/status
-│       ├── links.js              # GET  /api/links
-│       ├── rss.js                # GET  /api/rss
-│       ├── cron/refresh.js       # POST /api/cron/refresh（定时任务入口）
-│       └── admin/
-│           ├── login.js          # POST /api/admin/login
-│           ├── logout.js         # POST /api/admin/logout
-│           ├── change-password.js
-│           ├── list.js           # GET  /api/admin/list
-│           ├── review.js         # POST /api/admin/review
-│           ├── config.js         # GET/POST /api/admin/config
-│           ├── test-email.js
-│           ├── refresh-rss.js
-│           └── rss-status.js
-├── wrangler.toml
-└── README.md
-```
+| 页面 | 功能 | 谁在用 |
+|------|------|--------|
+| 🏠 **首页 `/`** | 访客提交友链申请（含表单+7条条款） | 你的朋友/博客访客 |
+| 🔍 **查询页 `/cheak`** | 输入名称或链接，查看审核结果 | 申请者自己 |
+| 🔐 **管理后台 `/admin`** | 审核、编辑、置顶、配置邮件/图床/RSS | **你** |
+| 🔗 **`/api/links`** | 返回你已通过的友链（标准 JSON 格式） | 你的博客前端 |
+| 🎯 **`/api/links-qexo`** | 返回 Qexo 兼容格式的友链数据 | Qexo 用户 |
+| 📡 **`/api/rss`** | 聚合友链的最新文章（前 20 条） | RSS 阅读器/你的博客 |
 
-## 🚀 部署步骤
+---
 
-### 1. 推到 GitHub
+## 🚀 小白部署指南（全程鼠标点，不用打命令）
 
-```bash
-cd friend-link-system
-git init
-git add .
-git commit -m "init"
-git remote add origin https://github.com/你的用户名/friend-link-system.git
-git push -u origin main
-```
+> **你需要准备**：一个 GitHub 账号 + 一个 Cloudflare 账号（注册免费）
 
-### 2. Cloudflare Dashboard 创建 Pages 项目
+### 第 1 步：把代码复制到你自己的 GitHub
 
-1. 进入 [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. 选择你的仓库
-3. **Build settings**：
-   - Framework preset: **None**
-   - Build command: 留空
-   - Build output directory: `public`
-4. 点 Save and Deploy
+1. 打开 [这个仓库](https://github.com/zlm6666/friend-link-system)
+2. 点右上角 **Fork** 按钮（把代码复制到你自己的账号下）
+3. 等几秒，完成后你名下会多出一个一模一样的仓库
 
-### 3. 绑定 KV 命名空间
+> 如果你会用 Git，也可以 `git clone` 然后推到你自己的仓库，两种方式都可以。
 
-1. **创建 KV**：Workers & Pages → **KV** → **Create a namespace** → 命名 `friend-links`
-2. **绑定到 Pages**：Pages 项目 → **Settings** → **Functions** → **KV namespace bindings** → **Add binding**
-   - Variable name: `LINKS`
-   - KV namespace: `friend-links`
+### 第 2 步：在 Cloudflare 创建项目
 
-### 4. 设置环境变量
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 左侧菜单点 **Workers & Pages**
+3. 点 **Create** → **Pages** → **Connect to Git**
+4. **授权 Cloudflare 访问你的 GitHub**（第一次用的话需要点一下授权）
+5. 在弹出的仓库列表里找到你刚 Fork 的那个仓库，点 **Begin setup**
+6. **Build settings** 保持默认就行，但检查一下：
+   - **Framework preset** → 选 **None**
+   - **Build command** → 留空
+   - **Build output directory** → 填 **`public`**
+7. 点 **Save and Deploy**
+8. 等一两分钟，Cloudflare 会自动构建部署。完成后会给你一个地址：`xxxx-xxx.pages.dev`
 
-Pages 项目 → **Settings** → **Environment variables** → 添加：
+### 第 3 步：绑定 KV 数据库（用来存数据）
 
-| 变量名 | 必填 | 说明 |
-|--------|------|------|
-| `CRON_SECRET` | ✅ | 任意随机字符串，用于 `/api/cron/refresh` 鉴权 |
-| `TUCANG_TOKEN` | 可选 | TuCang 图床 token（不设则用 KV 配置或内置默认值） |
-| `TUCANG_FOLDER_ID` | 可选 | TuCang 图床文件夹 ID |
+> KV 是 Cloudflare 提供的一个免费数据库，用来存储友链记录、配置等。
 
-### 5. 配置定时刷新 RSS
+1. 回到 Cloudflare Dashboard，左侧菜单点 **Workers & Pages** → **KV**
+2. 点 **Create a namespace** → 名称填 **`friend-links`** → 点 **Create**
+3. 回到 **Workers & Pages**，点你刚创建的那个 Pages 项目
+4. 点顶部的 **Settings** 标签 → 左侧 **Functions** → **KV namespace bindings**
+5. 点 **Add binding**：
+   - **Variable name** 填：**`LINKS`**（必须一模一样，大小写不能错）
+   - **KV namespace** 选：**`friend-links`**（刚创建的那个）
+6. 🔴 **注意**：上面有个下拉框可以选 `Production` 还是 `Preview`，**两个都要各绑定一次**，不然部署新版本后配置会丢
 
-Cloudflare Pages Functions **不支持** Cron Triggers（只有单独部署的 Workers 支持），所以用外部 cron：
+### 第 4 步：配置环境变量
 
-- 推荐 [cron-job.org](https://cron-job.org/)（免费、无需信用卡）
-- 创建任务：
-  - URL: `https://你的域名.pages.dev/api/cron/refresh`
-  - Method: `POST`（或 GET）
-  - Headers: `X-Cron-Secret: 你的CRON_SECRET值`
-  - 执行频率：每 30 分钟
+> 用来存一些密钥类的信息，不暴露在代码里。
 
-### 6. 登录管理后台
+1. 在同一个项目里，点 **Settings** → **Environment variables**
+2. 点 **Add variable**：
+   | 变量名 | 值 | 说明 |
+   |--------|-----|------|
+   | `CRON_SECRET` | 随便打一串乱码，比如 `abc123xyz` | 用来保护你的 RSS 刷新接口 |
+3. 🔴 **同样**：`Production` 和 `Preview` 各配一次
 
-访问 `https://你的域名.pages.dev/admin`，用 `admin` / `123456` 登录。
+### 第 5 步：登录管理后台
 
-⚠️ 首次登录会强制要求改密！
+1. 打开浏览器访问：`https://你的域名.pages.dev/admin`
+2. 默认账号：**`admin`**，密码：**`123456`**
+3. ⚠️ **首次登录会强制要求改密码**，改一个你自己记得住的
+4. 登录成功后，你就能看到友链管理后台了
 
-### 7. 配置邮件服务
+### 第 6 步（可选）：配置邮件通知
 
-使用 **Resend** API（免费 100 封/天，3000 封/月，无需绑卡）。
+> 有人提交友链申请时，系统会发邮件通知你。用 Resend 服务，免费 100 封/天。
 
-1. 注册 [resend.com](https://resend.com) → **Add domain** 验证你的域名
-2. 去 Dashboard 验证域名（添加 DNS TXT/DKIM 记录，按 Resend 提示操作）
-3. 拿到 **API Key**（`re_xxxxx` 格式）
-4. 登录管理后台 → **邮件配置** → 填入 API Key、发件邮箱（已验证的域名地址）、收件邮箱
-5. 点 **发送测试邮件** 验证
+1. 注册 [Resend](https://resend.com)（邮箱验证即可，不用绑卡）
+2. 登录 Resend → **Add domain** → 输入你的域名（比如 `yourdomain.com`）
+3. 按提示在你的域名 DNS 里添加两条记录（Resend 会告诉你加什么）
+4. 拿到 **API Key**（格式是 `re_xxxxx`）
+5. 打开你的友链管理后台 → **邮件配置**
+6. 填入：API Key、发件邮箱（验证过的那个）、收件邮箱（你自己的邮箱）
+7. 点 **保存**，然后点 **发送测试邮件** 验证
 
-然后登录管理后台 → **邮件配置**，填入：
-- **发件邮箱**：`noreply@你的域名.com`
-- **收件邮箱**：你的 QQ 邮箱 / Gmail / 任何邮箱
-- 点 **发送测试邮件** 验证
+> 💡 **收件邮箱可以用 QQ 邮箱**。如果收不到，去 Resend 后台检查域名 DKIM 是否验证成功，大概率是 DNS 记录没生效，等几分钟再试。
 
-### 8. 配置图床
+### 第 7 步（可选）：配置图床
 
-在管理后台 → **图床配置**：
-- Token：你在 TuCang 平台获取的 token
-- Folder ID：目标文件夹 ID
+> 审核通过友链时，系统会自动把对方的头像上传到 TuCang 图床，防止对方换图或图片挂了。
 
-> Token 存在 KV 里，不会暴露在代码中。
+1. 管理后台 → **图床配置**
+2. **Token** 填：`1769184743526286121fab11244f28a492ea46ae56e1f`
+3. **Folder ID** 填：`3576`
+4. 点保存
 
-### ⚠️ 常见问题：KV 绑定和环境变量被"吞"
+> 这些是内置的默认值，已经配好了，不填也能用。如果你想换用自己的图床账号，去 TuCang 注册后获取自己的 Token。
 
-Cloudflare Pages 的 **Production** 和 **Preview** 部署配置是独立的。每次 push 代码后自动创建的是 Preview 部署，但你可能只配了 Production：
+### 第 8 步（可选）：配置 RSS 自动更新
 
-```
-Settings → Functions → KV namespace bindings
-  ↳ 先切到 Preview → 再绑定一次 LINKS
+> 系统每隔一段时间会自动抓取友链的最新文章。
 
-Settings → Environment variables
-  ↳ 先切到 Preview → 再配一次 CRON_SECRET
-```
+由于 Cloudflare 不支持自动定时任务，需要一个免费的外部服务来触发：
 
-两个环境都配好就不会吞了。
+1. 打开 [cron-job.org](https://cron-job.org) 注册
+2. 点 **Create Cronjob**
+3. 按下面填：
+   - **URL**：`https://你的域名.pages.dev/api/cron/refresh`
+   - **Method**：选 **GET**
+   - **Headers**：加一个 `X-Cron-Secret`，值填你第 4 步设的 `CRON_SECRET`
+   - **Schedule**：选 **Every 4 hours**
+4. 点 **Create**，搞定
 
-## 📡 API 文档
+> 这样每 4 小时系统会自动刷新 RSS，不需要你做任何操作。
+
+### 第 9 步：绑定你自己的域名（推荐）
+
+> 用 `xxx.pages.dev` 也能用，但绑定自己的域名更好看也更稳定。
+
+1. Cloudflare Dashboard → **Workers & Pages** → 你的项目
+2. 点 **Custom domains** → **Set up a custom domain**
+3. 输入你的域名（比如 `friends.yourdomain.com`）
+4. Cloudflare 会自动配置 DNS，等一两分钟生效
+
+---
+
+## 🖥️ 页面一览
+
+### 申请页 `/`
+访客在这里提交友链申请，需要填写：
+- 网站标题、头像链接、网址、一句话描述
+- RSS 地址（可选）
+- 勾选同意 7 条友链原则
+
+### 查询页 `/cheak`
+输入你的网站名称或链接，就能看到审核状态：⏳ 待审 / ✅ 已通过 / ❌ 已拒绝
+
+### 管理后台 `/admin`
+所有管理操作都在这里：
+
+| 功能 | 说明 |
+|------|------|
+| 📋 待审核 | 新申请列表，点"通过"或"拒绝" |
+| ✅ 已通过 | 已通过的友链，可以编辑、置顶、删除 |
+| ❌ 已拒绝 | 被拒绝的申请记录 |
+| 📡 RSS 状态 | 查看当前聚合进度，手动触发刷新 |
+| ✉️ 邮件配置 | 配置发件信息 |
+| 🖼️ 图床配置 | 配置头像自动上传 |
+| 🔑 修改密码 | 改密码 |
+
+---
+
+## 📡 API 接口（给开发者用的）
 
 ### `GET /api/links`
 
-返回已通过友链（标准化格式）：
+返回你所有已通过的友链：
 ```json
 [
   {
@@ -156,60 +173,82 @@ Settings → Environment variables
 ]
 ```
 
+### `GET /api/links-qexo`
+
+返回 Qexo 兼容格式（Qexo 用户用这个）：
+```json
+{
+  "data": [
+    {
+      "name": "笑的主页",
+      "url": "https://xiaow.qzz.io",
+      "image": "https://wp-cdn.4ce.cn/v2/TVFIv5x.jpeg",
+      "description": "看看我都干了些啥？"
+    }
+  ],
+  "status": true
+}
+```
+
+前端调用脚本：
+```javascript
+function loadQexoFriends(id, url) {
+  var uri = url + "/api/links-qexo";
+  // ...（其余代码不变，只用改上面这行路径）
+}
+loadQexoFriends("friends", "https://你的域名.pages.dev");
+```
+
 ### `GET /api/rss`
 
-返回聚合后的最新 20 篇文章：
+返回聚合的最新 20 篇文章：
 ```json
 [
   {
     "title": "文章标题",
-    "auther": "来源博客名",
+    "auther": "来源博客",
     "date": "2026-06-14",
     "link": "https://...",
-    "content": "文章摘要..."
+    "content": "文章摘要"
   }
 ]
 ```
 
-### `GET /api/status?q=关键词`
-
-查询申请状态（按标题或链接模糊匹配）。
+### `GET /api/status?q=网站名称`
+查询友链申请状态。
 
 ### `POST /api/submit`
+提交友链申请（被申请页调用的，一般不需要手动调）。
 
-提交申请（公开）：
-```json
-{
-  "title": "网站标题",
-  "avatar": "https://...",
-  "link": "https://...",
-  "descr": "描述",
-  "rss": "https://.../rss.xml",
-  "agreed": true
-}
-```
+---
 
-## 🔄 RSS 轮换机制
+## ❓ 常见问题
 
-- 数据源：从 `link:list:approved` 中所有记录的 `rss` 字段 + 默认 6 个兜底源
-- 触发：cron-job.org 每 30 分钟调用 `/api/cron/refresh`
-- 行为：每次选游标处 **2 条** RSS 源抓取，与现有文章合并去重，按时间倒序取前 20
-- 存储：写入 KV `rss:articles`，API 直接读
-- 游标：循环推进（0 → 2 → 4 → ... → 末尾回 0）
+### Q：KV 绑定配置好了，过一会儿又没了？
+Cloudflare 的 **Production** 和 **Preview** 是两套独立配置。你配了 Production 但没配 Preview。去 Settings 里两个环境都配一次就好。
 
-## 🛠️ 本地开发
+### Q：登录后 F5 刷新又回到登录页？
+部署新版本后需要等一两分钟让 Cloudflare 完成构建。如果一直这样，浏览器硬刷新一下（Ctrl+Shift+R）。
 
-```bash
-# 安装 wrangler
-npm install -g wrangler
+### Q：测试邮件发送失败？
+1. 检查 Resend API Key 是否正确
+2. 检查发件邮箱的域名是否在 Resend 验证完成
+3. 去 Resend 后台看有没有错误日志
 
-# 本地预览（含 Functions）
-wrangler pages dev ./public
+### Q：提交友链申请后没收到邮件通知？
+先确认管理后台的邮件配置保存成功并测试通过。如果测试通过但申请不通知，检查 `CRON_SECRET` 环境变量是否配置正确。
 
-# 模拟 KV（在 Dashboard 拿一个测试命名空间 ID）
-wrangler pages dev ./public --kv LINKS=<KV_ID> --binding CRON_SECRET=test
-```
+### Q：部署失败怎么办？
+去 Cloudflare Dashboard → 你的 Pages 项目 → **Deployments**，点开最新那条失败的记录看日志。常见原因是 Functions 代码有语法错误——可以提 Issue 告诉我。
 
-## 📝 License
+---
 
-MIT
+## 📄 License
+
+[MIT](LICENSE) — 随便用，随便改，保留原作者信息即可。
+
+## ⭐ 支持一下
+
+如果这个项目帮到了你，点个 Star ⭐ 就是最大的支持！
+
+有问题或建议 → [提 Issue](https://github.com/zlm6666/friend-link-system/issues)
