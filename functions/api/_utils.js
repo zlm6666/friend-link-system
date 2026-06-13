@@ -158,7 +158,6 @@ export async function sendEmail(env, subject, html) {
   }
   return await resp.json();
 }
-}
 
 // 图床上传
 export async function uploadToTuCang(env, imageUrl) {
