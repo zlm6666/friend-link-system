@@ -6,7 +6,7 @@ export async function onRequestGet({ env }) {
   const raw = await env.LINKS.get('rss:articles');
   const articles = raw ? JSON.parse(raw) : [];
   // 去掉 internal 字段，只返回标准格式
-  const clean = articles.map(({ isoDate, ...rest }) => rest);
+  const clean = articles.map(({ isoDate, sourceFeedTitle, ...rest }) => rest);
   return new Response(JSON.stringify(clean, null, 2), {
     status: 200,
     headers: {

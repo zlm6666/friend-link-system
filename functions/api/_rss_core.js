@@ -203,6 +203,7 @@ function formatArticle(article) {
 
   let auther = '未知作者';
   if (article.author) auther = article.author;
+  else if (article.auther) auther = article.auther;        // 兼容已格式化的旧文章
   else if (typeof article.source === 'string') auther = article.source;
   else if (article.sourceFeedTitle) auther = article.sourceFeedTitle;
   auther = cleanText(auther).substring(0, 50);
@@ -217,6 +218,7 @@ function formatArticle(article) {
     date: dateStr,
     isoDate: date.toISOString(),
     link: article.link || '',
-    content: cleanContent
+    content: cleanContent,
+    sourceFeedTitle: article.sourceFeedTitle || auther      // 保留，供下次合并重新入库时用
   };
 }
