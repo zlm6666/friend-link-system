@@ -237,6 +237,19 @@
                 <input x-model="emailCfg.to" type="email" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400"
                   placeholder="admin@qq.com（接收通知的邮箱）">
               </div>
+              <!-- QQ SMTP 凭据 -->
+              <div class="border-t border-gray-100 pt-3 mt-3">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" x-model="emailCfg.useSmtp" class="rounded text-purple-500 focus:ring-purple-400">
+                  <span class="text-sm font-medium text-gray-700">使用 QQ 邮箱 SMTP 发信</span>
+                </label>
+                <p class="text-xs text-gray-400 mt-1 ml-5">在 <a href="https://resend.com/smtp" target="_blank" class="text-blue-600">Resend → SMTP</a> 添加凭据后，这里填你的 QQ 邮箱地址，邮件将从 QQ 邮箱发出（送达率最高）</p>
+                <div x-show="emailCfg.useSmtp" x-transition class="mt-2">
+                  <input x-model="emailCfg.qqSmtpFrom" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400"
+                    placeholder="xxx@qq.com">
+                  <p class="text-xs text-gray-400 mt-1">💡 开启后发件邮箱字段将不再使用</p>
+                </div>
+              </div>
               <div class="flex flex-col sm:flex-row gap-2 pt-2">
                 <button type="submit" :disabled="saving" class="btn bg-blue-500 text-white px-5 py-2 rounded-lg">保存</button>
                 <button type="button" @click="testEmail" :disabled="testing" class="btn bg-green-500 text-white px-5 py-2 rounded-lg">
@@ -365,7 +378,7 @@ function admin() {
     // RSS
     rssStatus: { cursor: 0, lastUpdate: null, currentFeeds: [], articleCount: 0 }, refreshing: false,
     // 配置
-    emailCfg: { apiKey: '', from: '', fromName: '', to: '' },
+    emailCfg: { apiKey: '', from: '', fromName: '', to: '', useSmtp: false, qqSmtpFrom: '' },
     tuCangCfg: { token: '', folderId: '' },
     aiCfg: { apiKey: '' }, aiMsg: '', aiOk: false,
     saving: false, testing: false, emailMsg: '', emailOk: false, tuCangMsg: '', tuCangOk: false,
@@ -576,7 +589,10 @@ function admin() {
         const r = await this.api('/api/admin/config');
         if (r.ok) {
           const d = await r.json();
-          if (d.data?.email) this.emailCfg = { ...this.emailCfg, ...d.data.email };
+          if (d.data?.email) {
+            this.emailCfg = { ...this.emailCfg, ...d.data.email };
+            if (d.data.email.qqSmtpFrom) this.emailCfg.useSmtp = true;
+          }
           if (d.data?.tuCang) this.tuCangCfg = { ...this.tuCangCfg, ...d.data.tuCang };
           if (d.data?.ai) this.aiCfg = { ...this.aiCfg, ...d.data.ai };
         }
@@ -586,10 +602,14 @@ function admin() {
     async saveEmail() {
       this.saving = true; this.emailMsg = ''; this.emailOk = false;
       try {
+        const data = { ...this.emailCfg };
+        // useSmtp 只是前端开关，不存到后端
+        if (!data.useSmtp) data.qqSmtpFrom = '';
+        delete data.useSmtp;
         const r = await this.api('/api/admin/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'email', data: this.emailCfg })
+          body: JSON.stringify({ type: 'email', data })
         });
         const d = await r.json();
         if (r.ok) { this.emailOk = true; this.emailMsg = '✅ ' + d.data?.message; }

@@ -172,6 +172,10 @@ export async function sendEmail(env, subject, html, to) {
   if (!cfg.apiKey || !cfg.from) throw new Error('邮件配置不完整（apiKey/from）');
   if (!cfg.to && !to) throw new Error('收件邮箱未配置');
 
+  // 如果配置了 QQ SMTP 凭据邮箱，切换 from 走 QQ 邮箱发信
+  const from = cfg.qqSmtpFrom ? cfg.qqSmtpFrom.trim() : cfg.from;
+  const fromDisplay = cfg.fromName ? `${cfg.fromName} <${from}>` : from;
+
   const resp = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -179,7 +183,7 @@ export async function sendEmail(env, subject, html, to) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: cfg.fromName ? `${cfg.fromName} <${cfg.from}>` : cfg.from,
+      from: fromDisplay,
       to: to || cfg.to,
       subject,
       html
