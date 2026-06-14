@@ -10,13 +10,12 @@ export async function onRequestGet({ env }) {
     if (!r) continue;
     items.push(r);
   }
-  // 置顶排最前
-  items.sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    return 0;
-  });
-  const out = items.map(r => ({
+  // 置顶排最前，其余随机打乱
+  const pinned = items.filter(r => r.pinned);
+  const unpinned = items.filter(r => !r.pinned);
+  shuffle(unpinned);
+  const sorted = [...pinned, ...unpinned];
+  const out = sorted.map(r => ({
     name: r.title, link: r.link, avatar: r.avatar, descr: r.descr
   }));
   return new Response(JSON.stringify(out, null, 2), {
@@ -37,4 +36,11 @@ export async function onRequestOptions() {
       'Access-Control-Allow-Methods': 'GET, OPTIONS'
     }
   });
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
 }
