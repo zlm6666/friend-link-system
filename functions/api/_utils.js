@@ -136,27 +136,49 @@ export async function setList(env, key, arr) {
 // 精美邮件 HTML 模板
 export function buildEmailHtml(title, content, btnText, btnUrl) {
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:30px 10px">
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>a{color:#667eea}img{border:0;outline:none}</style></head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',Roboto,Helvetica,Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 10px">
 <tr><td align="center">
-<table width="100%" style="max-width:560px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06)">
-  <!-- 顶栏 -->
-  <tr><td style="background:linear-gradient(135deg,#667eea,#764ba2);padding:32px 36px;text-align:center">
-    <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700">${title}</h1>
-  </td></tr>
-  <!-- 内容 -->
-  <tr><td style="padding:32px 36px;color:#374151;font-size:15px;line-height:1.7">
-    ${content}
-  </td></tr>
-  ${btnText && btnUrl ? `<tr><td style="padding:0 36px 36px;text-align:center">
-    <a href="${btnUrl}" style="display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;padding:12px 32px;border-radius:8px;font-size:15px;font-weight:600">${btnText}</a>
-  </td></tr>` : ''}
-  <!-- 底栏 -->
-  <tr><td style="padding:20px 36px;background:#f9fafb;text-align:center;font-size:12px;color:#9ca3af">
-    友链管理系统 · 自动发送，请勿回复
-  </td></tr>
-</table>
+  <!-- 外层卡片 -->
+  <table width="100%" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08)">
+    <!-- 顶栏 -->
+    <tr><td style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:0">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:36px 40px 28px;text-align:center">
+          <!-- 装饰小圆点 -->
+          <table cellpadding="0" cellspacing="0" align="center" style="margin-bottom:12px">
+            <tr><td style="width:6px;height:6px;background:rgba(255,255,255,.35);border-radius:50%;margin:0 3px"></td>
+                <td style="width:6px;height:6px;background:rgba(255,255,255,.5);border-radius:50%;margin:0 3px"></td>
+                <td style="width:6px;height:6px;background:rgba(255,255,255,.35);border-radius:50%;margin:0 3px"></td></tr>
+          </table>
+          <h1 style="margin:0;color:#fff;font-size:24px;font-weight:700;letter-spacing:.5px">${title}</h1>
+        </td></tr>
+      </table>
+    </td></tr>
+    <!-- 分割装饰线 -->
+    <tr><td style="padding:0 40px"><div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent)"></div></td></tr>
+    <!-- 内容区 -->
+    <tr><td style="padding:28px 40px 24px;color:#374151;font-size:15px;line-height:1.8">
+      ${content}
+    </td></tr>
+    <!-- 按钮 -->
+    ${btnText && btnUrl ? `<tr><td style="padding:0 40px 32px;text-align:center">
+      <table cellpadding="0" cellspacing="0" align="center">
+        <tr><td style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;box-shadow:0 4px 12px rgba(102,126,234,.3)">
+          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:13px 36px;font-size:15px;font-weight:600;letter-spacing:.3px">${btnText}</a>
+        </td></tr>
+      </table>
+    </td></tr>` : ''}
+    <!-- 底栏 -->
+    <tr><td style="padding:20px 40px;background:#fafbfc;border-top:1px solid #f0f0f0;text-align:center;font-size:12px;color:#b0b7c3;line-height:1.6">
+      友链管理系统 · 自动发送，请勿回复<br>
+      <span style="font-size:11px;color:#c8ced9">你收到这封邮件是因为有人提交或修改了友链申请</span>
+    </td></tr>
+  </table>
+  <!-- 外置底部 -->
+  <table width="100%" style="max-width:560px"><tr><td style="padding:16px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">© ${new Date().getFullYear()} 友链管理系统</td></tr></table>
 </td></tr></table></body></html>`;
 }
 

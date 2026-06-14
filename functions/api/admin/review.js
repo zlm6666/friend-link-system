@@ -2,7 +2,7 @@
 // 审核操作：approve / reject / delete
 import { ok, err, requireAdmin, getList, setList, uploadToTuCang, sendEmail, buildEmailHtml, escapeHtml } from '../_utils.js';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, ctx }) {
   const auth = await requireAdmin(request, env);
   if (!auth.ok) return err(auth.reason, 401);
 
@@ -31,21 +31,19 @@ export async function onRequestPost({ request, env }) {
     await env.LINKS.delete(`link:pending:${id}`);
     await setList(env, 'link:list:pending', pending.filter(x => x !== id));
 
-    // 通知申请人
+    // 通知申请人（后台发送）
     if (record.email) {
-      try {
-        const origin = new URL(request.url).origin;
-        const content = `
-          <p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p>
-          <p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核，现在已展示在友链列表中。</p>
-          <table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151">
-            <tr><td>✅ 状态：已通过</td></tr>
-            <tr><td>📅 通过时间：${new Date().toISOString().slice(0, 10)}</td></tr>
-          </table>`;
-        await sendEmail(env, `🎉 友链已通过！${record.title}`,
-          buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`),
-          record.email);
-      } catch (e) { console.error('通过通知失败:', e.message); }
+      const origin = new URL(request.url).origin;
+      const content = `
+        <p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p>
+        <p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核，现在已展示在友链列表中。</p>
+        <table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151">
+          <tr><td>✅ 状态：已通过</td></tr>
+          <tr><td>📅 通过时间：${new Date().toISOString().slice(0, 10)}</td></tr>
+        </table>`;
+      ctx.waitUntil(sendEmail(env, `🎉 友链已通过！${record.title}`,
+        buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`), record.email)
+        .catch(e => console.error('通过通知失败:', e.message)));
     }
 
     return ok({ message: '已通过', record });
@@ -66,22 +64,20 @@ export async function onRequestPost({ request, env }) {
     await env.LINKS.delete(`link:pending:${id}`);
     await setList(env, 'link:list:pending', pending.filter(x => x !== id));
 
-    // 通知申请人
+    // 通知申请人（后台发送）
     if (record.email) {
-      try {
-        const origin = new URL(request.url).origin;
-        const reasonBlock = record.rejectReason
-          ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
-          : '';
-        const content = `
-          <p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p>
-          <p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>
-          ${reasonBlock}
-          <p style="margin:0;color:#9ca3af;font-size:13px">如果仍有疑问，可以重新提交申请</p>`;
-        await sendEmail(env, `😅 友链未通过 - ${record.title}`,
-          buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`),
-          record.email);
-      } catch (e) { console.error('拒绝通知失败:', e.message); }
+      const origin = new URL(request.url).origin;
+      const reasonBlock = record.rejectReason
+        ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
+        : '';
+      const content = `
+        <p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p>
+        <p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>
+        ${reasonBlock}
+        <p style="margin:0;color:#9ca3af;font-size:13px">如果仍有疑问，可以重新提交申请</p>`;
+      ctx.waitUntil(sendEmail(env, `😅 友链未通过 - ${record.title}`,
+        buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`), record.email)
+        .catch(e => console.error('拒绝通知失败:', e.message)));
     }
 
     return ok({ message: '已拒绝' });
@@ -176,23 +172,23 @@ export async function onRequestPost({ request, env }) {
         newList.push(id);
         await setList(env, `link:list:${newStatus}`, newList);
 
-        // 发通知
+        // 发通知（后台发送）
         if (notify && record.email) {
           const origin = new URL(request.url).origin;
-          try {
-            if (newStatus === 'approved') {
-              const content = `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核！</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已通过</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`;
-              await sendEmail(env, `🎉 友链已通过！${record.title}`,
-                buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`), record.email);
-            } else if (newStatus === 'rejected') {
-              const reasonBlock = record.rejectReason
-                ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
-                : '';
-              const content = `<p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>${reasonBlock}`;
-              await sendEmail(env, `😅 友链未通过 - ${record.title}`,
-                buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`), record.email);
-            }
-          } catch (e) { console.error('状态变更通知失败:', e.message); }
+          if (newStatus === 'approved') {
+            const content = `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核！</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已通过</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`;
+            ctx.waitUntil(sendEmail(env, `🎉 友链已通过！${record.title}`,
+              buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`), record.email)
+              .catch(e => console.error('状态变更通知失败:', e.message)));
+          } else if (newStatus === 'rejected') {
+            const reasonBlock = record.rejectReason
+              ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
+              : '';
+            const content = `<p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>${reasonBlock}`;
+            ctx.waitUntil(sendEmail(env, `😅 友链未通过 - ${record.title}`,
+              buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`), record.email)
+              .catch(e => console.error('状态变更通知失败:', e.message)));
+          }
         }
 
         return ok({ message: '状态已变更', record });

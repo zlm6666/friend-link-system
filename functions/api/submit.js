@@ -1,7 +1,7 @@
 // functions/api/submit.js
 import { ok, err, validateLink, genId, getList, setList, sendEmail, buildEmailHtml, escapeHtml } from './_utils.js';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, ctx }) {
   let body;
   try {
     body = await request.json();
@@ -44,29 +44,26 @@ export async function onRequestPost({ request, env }) {
   pending.push(id);
   await setList(env, 'link:list:pending', pending);
 
-  // 通知管理员
-  try {
-    const emailCfg = await env.LINKS.get('config:email');
-    if (emailCfg) {
-      const adminUrl = new URL(request.url).origin + '/admin';
-      const content = `
-        <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
-          <tr><td style="padding:4px 0"><b style="color:#667eea">标题</b></td></tr>
-          <tr><td style="padding:0 0 12px">${escapeHtml(record.title)}</td></tr>
-          <tr><td style="padding:4px 0"><b style="color:#667eea">链接</b></td></tr>
-          <tr><td style="padding:0 0 12px"><a href="${record.link}" style="color:#667eea">${record.link}</a></td></tr>
-          <tr><td style="padding:4px 0"><b style="color:#667eea">描述</b></td></tr>
-          <tr><td style="padding:0 0 12px">${escapeHtml(record.descr)}</td></tr>
-          <tr><td style="padding:4px 0"><b style="color:#667eea">RSS</b></td></tr>
-          <tr><td style="padding:0 0 12px">${record.rss ? `<a href="${record.rss}" style="color:#667eea">${record.rss}</a>` : '<span style="color:#9ca3af">未提供</span>'}</td></tr>
-          <tr><td style="padding:4px 0"><b style="color:#667eea">邮箱</b></td></tr>
-          <tr><td style="padding:0 0 12px">${record.email || '<span style="color:#9ca3af">未提供</span>'}</td></tr>
-        </table>`;
-      await sendEmail(env, `【新友链申请】${record.title}`,
-        buildEmailHtml('📩 新友链申请', content, '前往审核', adminUrl));
-    }
-  } catch (e) {
-    console.error('通知邮件发送失败:', e.message);
+  // 通知管理员（后台发送，不阻塞响应）
+  const emailCfg = await env.LINKS.get('config:email');
+  if (emailCfg) {
+    const adminUrl = new URL(request.url).origin + '/admin';
+    const content = `
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
+        <tr><td style="padding:4px 0"><b style="color:#667eea">标题</b></td></tr>
+        <tr><td style="padding:0 0 12px">${escapeHtml(record.title)}</td></tr>
+        <tr><td style="padding:4px 0"><b style="color:#667eea">链接</b></td></tr>
+        <tr><td style="padding:0 0 12px"><a href="${record.link}" style="color:#667eea">${record.link}</a></td></tr>
+        <tr><td style="padding:4px 0"><b style="color:#667eea">描述</b></td></tr>
+        <tr><td style="padding:0 0 12px">${escapeHtml(record.descr)}</td></tr>
+        <tr><td style="padding:4px 0"><b style="color:#667eea">RSS</b></td></tr>
+        <tr><td style="padding:0 0 12px">${record.rss ? `<a href="${record.rss}" style="color:#667eea">${record.rss}</a>` : '<span style="color:#9ca3af">未提供</span>'}</td></tr>
+        <tr><td style="padding:4px 0"><b style="color:#667eea">邮箱</b></td></tr>
+        <tr><td style="padding:0 0 12px">${record.email || '<span style="color:#9ca3af">未提供</span>'}</td></tr>
+      </table>`;
+    ctx.waitUntil(sendEmail(env, `【新友链申请】${record.title}`,
+      buildEmailHtml('📩 新友链申请', content, '前往审核', adminUrl))
+      .catch(e => console.error('通知邮件发送失败:', e.message)));
   }
 
   return ok({ id, message: '申请已提交，请等待审核' });
