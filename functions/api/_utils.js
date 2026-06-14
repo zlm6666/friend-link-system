@@ -171,7 +171,6 @@ export async function sendEmail(env, subject, html, to) {
   const raw = await env.LINKS.get('config:email');
   if (!raw) throw new Error('邮件未配置');
   const cfg = JSON.parse(raw);
-  if (!cfg.apiKey || !cfg.from) throw new Error('邮件配置不完整（apiKey/from）');
   if (!cfg.to && !to) throw new Error('收件邮箱未配置');
 
   const provider = cfg.provider || 'resend';
@@ -181,6 +180,9 @@ export async function sendEmail(env, subject, html, to) {
     if (!smtpCfg) throw new Error('SMTP 未配置');
     return sendViaSmtp(smtpCfg, subject, html, to || cfg.to);
   }
+
+  // Resend / SendGrid 需要 apiKey 和 from
+  if (!cfg.apiKey || !cfg.from) throw new Error('邮件配置不完整（apiKey/from）');
 
   if (provider === 'sendgrid') {
     return sendViaSendgrid(cfg, subject, html, to || cfg.to);

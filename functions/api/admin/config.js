@@ -36,7 +36,9 @@ export async function onRequestPost({ request, env }) {
       const old = JSON.parse(await env.LINKS.get('config:email') || '{}');
       data.apiKey = old.apiKey || '';
     }
-    if (!data.apiKey || !data.from || !data.to) return err('apiKey、from、to 必填');
+    // SMTP 模式不需要 apiKey 和 from（走自己的 SMTP 配置）
+    if (data.provider !== 'smtp' && (!data.apiKey || !data.from)) return err('apiKey、from 必填');
+    if (!data.to) return err('to 必填');
     await env.LINKS.put('config:email', JSON.stringify({
       provider: data.provider || 'resend',
       apiKey: data.apiKey.trim(),

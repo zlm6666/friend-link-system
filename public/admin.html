@@ -399,11 +399,8 @@ function admin() {
     aiCfg: { apiKey: '' }, aiMsg: '', aiOk: false,
 
     onProviderChange() {
-      // 切到 SMTP 时清空 API Key 和发件邮箱（属于 Resend/SendGrid 的字段）
-      if (this.emailCfg.provider === 'smtp') {
-        this.emailCfg.apiKey = '******';
-        this.emailCfg.from = '';
-      }
+      // 切到 SMTP 时用掩码避免保存时校验 apiKey
+      if (this.emailCfg.provider === 'smtp') this.emailCfg.apiKey = '******';
     },
     saving: false, testing: false, emailMsg: '', emailOk: false, tuCangMsg: '', tuCangOk: false,
     pwdForm: { old: '', new: '', cfm: '' }, pwdMsg: '', pwdOk: false,
