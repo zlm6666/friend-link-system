@@ -197,7 +197,15 @@ export function escapeHtml(s) {
   }[c]));
 }
 
-// 邮件发送，to 可选，不传则用配置中的收件邮箱
+// 邮件入队——秒存 KV，由 cron job 异步发送
+export async function queueEmail(env, subject, html, to) {
+  const raw = await env.LINKS.get('config:email');
+  if (!raw) return; // 未配邮件则跳过
+  const key = `email-queue:${Date.now()}.${Math.random().toString(36).slice(2, 6)}`;
+  await env.LINKS.put(key, JSON.stringify({ subject, html, to: to || '', createdAt: Date.now() }));
+}
+
+// 邮件发送（同步，仅供测试邮件等需要即时反馈的场景）
 export async function sendEmail(env, subject, html, to) {
   const raw = await env.LINKS.get('config:email');
   if (!raw) throw new Error('邮件未配置');
@@ -209,18 +217,15 @@ export async function sendEmail(env, subject, html, to) {
   if (provider === 'smtp') {
     const smtpCfg = JSON.parse(await env.LINKS.get('config:smtp') || 'null');
     if (!smtpCfg) throw new Error('SMTP 未配置');
-    if (!cfg.apiKey) throw new Error('API Key 未配置');
     return sendViaSmtp(smtpCfg, subject, html, to || cfg.to);
   }
 
-  // Resend / SendGrid 需要 apiKey 和 from
   if (!cfg.apiKey || !cfg.from) throw new Error('邮件配置不完整（apiKey/from）');
 
   if (provider === 'sendgrid') {
     return sendViaSendgrid(cfg, subject, html, to || cfg.to);
   }
 
-  // 默认 Resend
   return sendViaResend(cfg, subject, html, to || cfg.to);
 }
 
