@@ -71,7 +71,6 @@ export async function onRequestPost({ request, env }) {
 
   return ok({ id, message: '申请已提交，请等待审核' });
 }
-}
 
 export async function onRequestOptions() {
   return new Response(null, {
