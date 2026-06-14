@@ -135,50 +135,59 @@ export async function setList(env, key, arr) {
 
 // 精美邮件 HTML 模板
 export function buildEmailHtml(title, content, btnText, btnUrl) {
+  const bgFallback = '#fafafa;background-image:linear-gradient(135deg,#f5f0ff,#eef2ff)';
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>a{color:#667eea}img{border:0;outline:none}</style></head>
-<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',Roboto,Helvetica,Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 10px">
+<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
+<style>
+  :root { color-scheme: light dark; supported-color-schemes: light dark; }
+  @media (prefers-color-scheme: dark) {
+    .body-bg { background:#1a1a2e !important }
+    .card-bg { background:#1e1e30 !important;border-color:#2a2a40 !important }
+    .text-main { color:#e0e0e0 !important }
+    .text-sub { color:#a0a0b0 !important }
+    .footer-bg { background:#222238 !important;border-color:#2a2a40 !important }
+    .divider { background:#2a2a40 !important }
+  }
+</style></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',Roboto,sans-serif">
+<table class="body-bg" width="100%" cellpadding="0" cellspacing="0" style="background:${bgFallback};padding:40px 12px">
 <tr><td align="center">
-  <!-- 外层卡片 -->
-  <table width="100%" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08)">
+
+  <!-- 卡片 -->
+  <table class="card-bg" width="100%" style="max-width:540px;background:#fff;border:1px solid #e8e8f0;border-radius:10px;overflow:hidden">
     <!-- 顶栏 -->
-    <tr><td style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:0">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding:36px 40px 28px;text-align:center">
-          <!-- 装饰小圆点 -->
-          <table cellpadding="0" cellspacing="0" align="center" style="margin-bottom:12px">
-            <tr><td style="width:6px;height:6px;background:rgba(255,255,255,.35);border-radius:50%;margin:0 3px"></td>
-                <td style="width:6px;height:6px;background:rgba(255,255,255,.5);border-radius:50%;margin:0 3px"></td>
-                <td style="width:6px;height:6px;background:rgba(255,255,255,.35);border-radius:50%;margin:0 3px"></td></tr>
-          </table>
-          <h1 style="margin:0;color:#fff;font-size:24px;font-weight:700;letter-spacing:.5px">${title}</h1>
-        </td></tr>
-      </table>
+    <tr><td style="background:linear-gradient(135deg,#5b6ee5,#6c4fa7);padding:0">
+      <div style="padding:30px 36px 24px;text-align:center">
+        <table cellpadding="0" cellspacing="0" align="center" style="margin-bottom:10px">
+          <tr><td style="width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%;margin:0 3px"></td>
+              <td style="width:5px;height:5px;background:rgba(255,255,255,.55);border-radius:50%;margin:0 3px"></td>
+              <td style="width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%;margin:0 3px"></td></tr>
+        </table>
+        <p style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:.3px">${title}</p>
+      </div>
     </td></tr>
-    <!-- 分割装饰线 -->
-    <tr><td style="padding:0 40px"><div style="height:1px;background:linear-gradient(90deg,transparent,#e5e7eb,transparent)"></div></td></tr>
-    <!-- 内容区 -->
-    <tr><td style="padding:28px 40px 24px;color:#374151;font-size:15px;line-height:1.8">
-      ${content}
+    <!-- 内容 -->
+    <tr><td style="padding:28px 36px 20px">
+      <div class="text-main" style="font-size:15px;line-height:1.8;color:#374151">
+        ${content}
+      </div>
     </td></tr>
     <!-- 按钮 -->
-    ${btnText && btnUrl ? `<tr><td style="padding:0 40px 32px;text-align:center">
+    ${btnText && btnUrl ? `<tr><td style="padding:0 36px 28px;text-align:center">
       <table cellpadding="0" cellspacing="0" align="center">
-        <tr><td style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;box-shadow:0 4px 12px rgba(102,126,234,.3)">
-          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:13px 36px;font-size:15px;font-weight:600;letter-spacing:.3px">${btnText}</a>
+        <tr><td style="background:#5b6ee5;border-radius:7px">
+          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:600">${btnText}</a>
         </td></tr>
       </table>
     </td></tr>` : ''}
     <!-- 底栏 -->
-    <tr><td style="padding:20px 40px;background:#fafbfc;border-top:1px solid #f0f0f0;text-align:center;font-size:12px;color:#b0b7c3;line-height:1.6">
-      友链管理系统 · 自动发送，请勿回复<br>
-      <span style="font-size:11px;color:#c8ced9">你收到这封邮件是因为有人提交或修改了友链申请</span>
+    <tr class="footer-bg"><td style="padding:16px 36px;background:#fafafd;border-top:1px solid #f0f0f8;text-align:center;font-size:11px;color:#a0a0b8;line-height:1.8">
+      友链管理系统 · 自动通知，请勿回复
     </td></tr>
   </table>
-  <!-- 外置底部 -->
-  <table width="100%" style="max-width:560px"><tr><td style="padding:16px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">© ${new Date().getFullYear()} 友链管理系统</td></tr></table>
+
+  <div class="text-sub" style="padding:14px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">Tencent ima.copilot</div>
 </td></tr></table></body></html>`;
 }
 
