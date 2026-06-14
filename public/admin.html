@@ -231,7 +231,7 @@
               </div>
               <p x-show="emailCfg.provider==='resend'" class="text-xs text-gray-400 -mt-2"><p x-show="emailCfg.provider==='resend'" class="text-xs text-gray-400 -mt-2">注册 <a href="https://resend.com" target="_blank" class="text-blue-600">resend.com</a> → 验证域名 → 获取 API Key</p>
               <p x-show="emailCfg.provider==='sendgrid'" class="text-xs text-gray-400 -mt-2"><p x-show="emailCfg.provider==='sendgrid'" class="text-xs text-gray-400 -mt-2">注册 <a href="https://sendgrid.com" target="_blank" class="text-blue-600">sendgrid.com</a> → Settings → API Keys → Create Key</p>
-              <p x-show="emailCfg.provider==='smtp'" class="text-xs text-gray-400 -mt-2">📌 <p x-show="emailCfg.provider==='smtp'" class="text-xs text-gray-400 -mt-2">📌 QQ 邮箱需开启 SMTP：设置 → 账号 → POP3/SMTP 服务 → 开启 → 生成授权码</p>
+              <p x-show="emailCfg.provider==='smtp'" class="text-xs text-gray-400 -mt-2">📌 先去 <a href="https://resend.com/settings/smtp" target="_blank" class="text-blue-600">Resend → Settings → SMTP</a> 添加 SMTP 凭据（smtp.qq.com + QQ 邮箱 + 授权码），再回来填下面</p>
 
               <!-- Resend / SendGrid 字段 -->
               <div x-show="emailCfg.provider!=='smtp'" x-transition class="space-y-3">

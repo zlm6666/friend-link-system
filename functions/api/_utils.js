@@ -195,10 +195,16 @@ export async function sendEmail(env, subject, html, to) {
 
   const provider = cfg.provider || 'resend';
 
+  // SMTP 模式：通过 Resend SMTP 凭据中继（用户在 Resend 设置中配好 QQ 邮箱的 SMTP）
   if (provider === 'smtp') {
     const smtpCfg = JSON.parse(await env.LINKS.get('config:smtp') || 'null');
-    if (!smtpCfg) throw new Error('SMTP 未配置');
-    return sendViaSmtp(smtpCfg, subject, html, to || cfg.to);
+    if (!smtpCfg) throw new Error('SMTP 未配置（请先在 Resend → Settings → SMTP 添加凭据）');
+    if (!cfg.apiKey) throw new Error('API Key 未配置');
+    // 用 SMTP 配置中的发件邮箱（QQ 邮箱），走 Resend API 自动路由
+    const fromAddr = smtpCfg.fromName
+      ? `${smtpCfg.fromName} <${smtpCfg.from}>`
+      : smtpCfg.from;
+    return sendViaResend({ apiKey: cfg.apiKey, fromName: '', from: fromAddr }, subject, html, to || cfg.to);
   }
 
   // Resend / SendGrid 需要 apiKey 和 from
@@ -252,75 +258,6 @@ async function sendViaSendgrid(cfg, subject, html, to) {
     throw new Error(`SendGrid 发送失败 (${resp.status}): ${text}`);
   }
   return await resp.json();
-}
-
-// SMTP 直发（通过 QQ 邮箱等，使用 connect() API）
-async function sendViaSmtp(cfg, subject, html, to) {
-  const { connect } = await import('cloudflare:sockets');
-  const sock = connect({ hostname: cfg.host, port: cfg.port || 465 }, { secureTransport: 'on' });
-  const reader = sock.readable.getReader();
-  const writer = sock.writable.getWriter();
-  const enc = new TextEncoder();
-  let buf = '';
-
-  async function readLine() {
-    while (true) {
-      const idx = buf.indexOf('\r\n');
-      if (idx >= 0) {
-        const line = buf.slice(0, idx);
-        buf = buf.slice(idx + 2);
-        return line;
-      }
-      const { done, value } = await reader.read();
-      if (done) throw new Error('SMTP 连接中断');
-      buf += new TextDecoder().decode(value);
-    }
-  }
-
-  async function cmd(text) {
-    await writer.write(enc.encode(text + '\r\n'));
-    return readLine();
-  }
-
-  // 读 banner
-  let resp = await readLine();
-  if (!resp.startsWith('220')) throw new Error(`SMTP 连接失败: ${resp}`);
-
-  // EHLO
-  resp = await cmd('EHLO friend-link-system');
-  // 多行响应处理（250- 是中间行，250 是最后一行）
-  while (resp.startsWith('250-')) resp = await readLine();
-  if (!resp.startsWith('250')) throw new Error(`EHLO 失败: ${resp}`);
-
-  // AUTH LOGIN
-  resp = await cmd('AUTH LOGIN');
-  if (!resp.startsWith('334')) throw new Error(`AUTH 失败: ${resp}`);
-  resp = await cmd(btoa(cfg.user));
-  if (!resp.startsWith('334')) throw new Error(`用户名验证失败: ${resp}`);
-  resp = await cmd(btoa(cfg.password));
-  if (!resp.startsWith('235')) throw new Error(`密码验证失败: ${resp}`);
-
-  // MAIL FROM
-  resp = await cmd(`MAIL FROM:<${cfg.from}>`);
-  if (!resp.startsWith('250')) throw new Error(`MAIL FROM 失败: ${resp}`);
-
-  // RCPT TO
-  resp = await cmd(`RCPT TO:<${to}>`);
-  if (!resp.startsWith('250')) throw new Error(`RCPT TO 失败: ${resp}`);
-
-  // DATA
-  resp = await cmd('DATA');
-  if (!resp.startsWith('354')) throw new Error(`DATA 失败: ${resp}`);
-
-  // 发送邮件内容
-  const fromDisplay = cfg.fromName ? `${cfg.fromName} <${cfg.from}>` : cfg.from;
-  const body = `From: ${fromDisplay}\r\nTo: ${to}\r\nSubject: ${subject}\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf-8\r\n\r\n${html}\r\n.`;
-  resp = await cmd(body);
-  if (!resp.startsWith('250')) throw new Error(`邮件发送失败: ${resp}`);
-
-  await cmd('QUIT');
-  writer.close();
-  return resp;
 }
 
 // 图床上传
