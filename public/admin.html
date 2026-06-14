@@ -216,8 +216,18 @@
         <div x-show="tab==='email'">
           <h2 class="text-2xl font-bold text-white mb-4">✉️ 邮件配置</h2>
           <div class="card rounded-xl p-6 shadow">
-            <p class="text-sm text-gray-600 mb-4">通过 <b>Resend</b> API 发送。注册 <a href="https://resend.com" target="_blank" class="text-blue-600 underline">resend.com</a> → 验证域名 → 获取 API Key。</p>
+            <p class="text-sm text-gray-600 mb-4">发送审核通知邮件。</p>
             <form @submit.prevent="saveEmail" class="space-y-3">
+              <!-- 服务商选择 -->
+              <div>
+                <label class="block text-sm text-gray-700 mb-1 font-medium">邮件服务商</label>
+                <select x-model="emailCfg.provider" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 bg-white">
+                  <option value="resend">Resend（推荐）</option>
+                  <option value="sendgrid">SendGrid</option>
+                </select>
+              </div>
+              <p x-show="emailCfg.provider==='resend'" class="text-xs text-gray-400 -mt-2">注册 <a href="https://resend.com" target="_blank" class="text-blue-600">resend.com</a> → 验证域名 → 获取 API Key</p>
+              <p x-show="emailCfg.provider==='sendgrid'" class="text-xs text-gray-400 -mt-2">注册 <a href="https://sendgrid.com" target="_blank" class="text-blue-600">sendgrid.com</a> → Settings → API Keys → Create Key</p>
               <div>
                 <label class="block text-sm text-gray-700 mb-1 font-medium">Resend API Key <span class="text-red-500">*</span></label>
                 <input x-model="emailCfg.apiKey" type="password" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400"
@@ -365,7 +375,7 @@ function admin() {
     // RSS
     rssStatus: { cursor: 0, lastUpdate: null, currentFeeds: [], articleCount: 0 }, refreshing: false,
     // 配置
-    emailCfg: { apiKey: '', from: '', fromName: '', to: '' },
+    emailCfg: { provider: 'resend', apiKey: '', from: '', fromName: '', to: '' },
     tuCangCfg: { token: '', folderId: '' },
     aiCfg: { apiKey: '' }, aiMsg: '', aiOk: false,
     saving: false, testing: false, emailMsg: '', emailOk: false, tuCangMsg: '', tuCangOk: false,

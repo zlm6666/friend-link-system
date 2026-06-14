@@ -35,6 +35,7 @@ export async function onRequestPost({ request, env }) {
     }
     if (!data.apiKey || !data.from || !data.to) return err('apiKey、from、to 必填');
     await env.LINKS.put('config:email', JSON.stringify({
+      provider: data.provider || 'resend',
       apiKey: data.apiKey.trim(),
       from: data.from.trim(),
       fromName: (data.fromName || '').trim(),

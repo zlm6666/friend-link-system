@@ -164,7 +164,7 @@ export function escapeHtml(s) {
   }[c]));
 }
 
-// 邮件发送（Resend API），to 可选，不传则用配置中的收件邮箱
+// 邮件发送，to 可选，不传则用配置中的收件邮箱
 export async function sendEmail(env, subject, html, to) {
   const raw = await env.LINKS.get('config:email');
   if (!raw) throw new Error('邮件未配置');
@@ -172,6 +172,17 @@ export async function sendEmail(env, subject, html, to) {
   if (!cfg.apiKey || !cfg.from) throw new Error('邮件配置不完整（apiKey/from）');
   if (!cfg.to && !to) throw new Error('收件邮箱未配置');
 
+  const provider = cfg.provider || 'resend';
+
+  if (provider === 'sendgrid') {
+    return sendViaSendgrid(cfg, subject, html, to);
+  }
+
+  // 默认 Resend
+  return sendViaResend(cfg, subject, html, to);
+}
+
+async function sendViaResend(cfg, subject, html, to) {
   const resp = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -185,10 +196,30 @@ export async function sendEmail(env, subject, html, to) {
       html
     })
   });
-
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`发送失败 (${resp.status}): ${text}`);
+    throw new Error(`Resend 发送失败 (${resp.status}): ${text}`);
+  }
+  return await resp.json();
+}
+
+async function sendViaSendgrid(cfg, subject, html, to) {
+  const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${cfg.apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to || cfg.to }] }],
+      from: { email: cfg.from, name: cfg.fromName || '' },
+      subject,
+      content: [{ type: 'text/html', value: html }]
+    })
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`SendGrid 发送失败 (${resp.status}): ${text}`);
   }
   return await resp.json();
 }
