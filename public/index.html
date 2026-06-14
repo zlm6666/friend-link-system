@@ -339,7 +339,12 @@ function app() {
           this.form.link = d.data.link;
           this.form.descr = d.data.descr;
           this.form.rss = d.data.rss;
-          this.importMsg = '✅ AI 已解析，确认后点提交';
+          // 提示哪些字段缺失
+          const missing = [];
+          if (!d.data.title) missing.push('标题');
+          if (!d.data.link) missing.push('链接');
+          if (missing.length) this.importMsg = '⚠️ 部分字段未识别：' + missing.join('、') + '，请手动补充';
+          else this.importMsg = '✅ AI 已解析，确认后点提交';
           this.importOk = true;
         } else {
           this.importMsg = d.error || 'AI 解析失败';
