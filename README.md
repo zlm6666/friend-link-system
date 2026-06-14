@@ -96,12 +96,7 @@
 
 > 审核通过友链时，系统会自动把对方的头像上传到 TuCang 图床，防止对方换图或图片挂了。
 
-1. 管理后台 → **图床配置**
-2. **Token**：在 [TuCang](https://www.tucang.cc) 注册后获取
-3. **Folder ID**：上传到的文件夹编号，默认 `3576`
-4. 点保存
-
-> 这些是内置的默认值，已经配好了，不填也能用。如果你想换用自己的图床账号，去 TuCang 注册后获取自己的 Token。
+详细教程看这里 👉 [https://www.yuque.com/lazydoc/qlg37h/oyc0e8y8z99yi0m9](https://www.yuque.com/lazydoc/qlg37h/oyc0e8y8z99yi0m9)
 
 ### 第 8 步（可选）：配置 AI 一键导入
 
