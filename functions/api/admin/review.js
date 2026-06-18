@@ -47,6 +47,7 @@ export async function onRequestPost({ request, env }) {
         <table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151">
           <tr><td>✅ 状态：已通过</td></tr>
           <tr><td>📅 通过时间：${new Date().toISOString().slice(0, 10)}</td></tr>
+          <tr><td>🔗 你可在此看到你的链接：<a href="https://blog.xiaow.qzz.io/links/" style="color:#4f46e5;text-decoration:underline">blog.xiaow.qzz.io/links</a></td></tr>
         </table>`;
       await queueEmail(env, `🎉 友链已通过！${record.title}`,
         buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/check`), record.email);
