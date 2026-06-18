@@ -64,7 +64,6 @@ GET /api/links
 1. Cloudflare → Workers & Pages → KV → 创建命名空间 `friend-links`
 2. 回到 Pages 项目 → Settings → Functions → KV bindings
 3. 变量名: **`LINKS`**，选 `friend-links`
-4. ⚠️ **Production 和 Preview 各绑一次**
 
 ### 环境变量
 
