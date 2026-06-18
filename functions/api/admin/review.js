@@ -195,7 +195,7 @@ export async function onRequestPost({ request, env }) {
 <div class="info-card">
 <p><span class="label">站点名称：</span>${escapeHtml(record.title)}</p>
 <p><span class="label">站点地址：</span>${record.link}</p>
-<p><span class="label">申请状态：</span><strong style="color:#16a34a">${statusLabel}</strong></p>
+<p><span class="label">申请状态：</span><strong style="color:#16a34a;-webkit-text-fill-color:#16a34a">${statusLabel}</strong></p>
 </div>
 <p>${restored?'您的友链已恢复展示。':'恭喜！您的站点符合本站的友链标准，现已成功添加至友链页面。'}</p>
 <p>期待在未来的日子里，我们能通过文字产生更多的共鸣与连接。如果您发现信息有误，或有其他事宜，欢迎随时来信交流。</p>`;
@@ -214,7 +214,7 @@ export async function onRequestPost({ request, env }) {
 <div class="info-card">
 <p><span class="label">站点名称：</span>${escapeHtml(record.title)}</p>
 <p><span class="label">站点地址：</span>${record.link}</p>
-<p><span class="label">申请状态：</span><strong style="color:#dc2626">${statusLabel}</strong></p>
+<p><span class="label">申请状态：</span><strong style="color:#dc2626;-webkit-text-fill-color:#dc2626">${statusLabel}</strong></p>
 </div>
 ${blocked
   ? `<p>您的友链暂时被屏蔽，请检查内容是否符合规范。</p>${reasonBlock}<p>修改后可以重新提交申请恢复展示。</p>`

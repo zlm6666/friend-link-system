@@ -148,46 +148,46 @@ export function buildEmailHtml(title, content, btnText, btnUrl) {
 <title>友链通知</title>
 <style>
 html{color-scheme:light only!important}
-body{margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color:#333;line-height:1.6}
+body{margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color:#333;line-height:1.6;-webkit-text-fill-color:#333}
 .email-container{max-width:600px;margin:20px auto;border:1px solid #eee;border-radius:8px;overflow:hidden}
 .email-header{padding:24px;text-align:center;border-bottom:1px solid #f0f0f0;background:#ffffff}
-.email-header h1{margin:0;font-size:20px;color:#1a1a1a;font-weight:600}
+.email-header h1{margin:0;font-size:20px;color:#1a1a1a;font-weight:600;-webkit-text-fill-color:#1a1a1a}
 .email-body{padding:24px;font-size:15px;background:#ffffff;color:#333}
-.email-body p{margin:0 0 16px;color:#333}
-.email-body li{color:#333}
+.email-body p{margin:0 0 16px;color:#333;-webkit-text-fill-color:#333 !important}
+.email-body li{color:#333;-webkit-text-fill-color:#333 !important}
 .info-card{background:#fafafa;border-left:4px solid #4f46e5;padding:16px;margin:20px 0;border-radius:4px}
-.info-card p{margin:0 0 8px;word-break:break-all;color:#333}
+.info-card p{margin:0 0 8px;word-break:break-all;color:#333;-webkit-text-fill-color:#333 !important}
 .info-card p:last-child{margin-bottom:0}
-.label{font-weight:600;color:#555;display:inline-block;min-width:60px}
+.label{font-weight:600;color:#555;display:inline-block;min-width:60px;-webkit-text-fill-color:#555 !important}
 .button-container{text-align:center;margin:30px 0}
-.button{display:inline-block;background:#4f46e5;color:#fff!important;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500}
+.button{display:inline-block;background:#4f46e5;color:#fff!important;-webkit-text-fill-color:#fff !important;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500}
 .button:hover{background:#4338ca}
-.email-footer{padding:20px 24px;text-align:center;font-size:13px;color:#888;border-top:1px solid #f0f0f0;background:#ffffff}
+.email-footer{padding:20px 24px;text-align:center;font-size:13px;color:#888;border-top:1px solid #f0f0f0;background:#ffffff;-webkit-text-fill-color:#888 !important}
 @media screen and (max-width:620px){
 .email-container{margin:0;border:none;border-radius:0}
 .email-body,.email-header,.email-footer{padding:20px}
 }
 @media (prefers-color-scheme:dark){
 body,.email-container,.email-body,.email-header,.email-footer,.info-card{background:#ffffff!important}
-body,p,h1,li,.label,.email-body p,.email-footer,.info-card,.info-card p{color:#333!important}
-.email-header h1{color:#1a1a1a!important}
-.email-footer{color:#888!important;background:#ffffff!important}
+body,p,h1,h2,h3,li,.label,.email-body p,.email-footer,.info-card,.info-card p,.email-body li{color:#333!important;-webkit-text-fill-color:#333!important}
+.email-header h1{color:#1a1a1a!important;-webkit-text-fill-color:#1a1a1a!important}
+.email-footer{color:#888!important;-webkit-text-fill-color:#888!important;background:#ffffff!important}
 .info-card{background:#fafafa!important}
-.label{color:#555!important}
-.button{background:#4f46e5!important;color:#fff!important}
+.label{color:#555!important;-webkit-text-fill-color:#555!important}
+.button{background:#4f46e5!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 </style>
 </head>
-<body style="background:#ffffff;color:#333333">
+<body style="background:#ffffff;color:#333;-webkit-text-fill-color:#333">
 <div class="email-container">
   <div class="email-header">
-    <h1>${title}</h1>
+    <h1 style="color:#1a1a1a;-webkit-text-fill-color:#1a1a1a">${title}</h1>
   </div>
-  <div class="email-body">
+  <div class="email-body" style="color:#333;-webkit-text-fill-color:#333">
     ${content}
-    ${btnText && btnUrl ? `<div class="button-container"><a href="${btnUrl}" class="button">${btnText}</a></div>` : ''}
+    ${btnText && btnUrl ? `<div class="button-container"><a href="${btnUrl}" class="button" style="color:#fff;-webkit-text-fill-color:#fff">${btnText}</a></div>` : ''}
   </div>
-  <div class="email-footer">
+  <div class="email-footer" style="color:#888;-webkit-text-fill-color:#888">
     此为系统自动发送的邮件，请勿直接回复。
   </div>
 </div>
