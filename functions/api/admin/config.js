@@ -96,6 +96,12 @@ export async function onRequestPost({ request, env }) {
   if (type === 'username') {
     if (!data.username || !data.username.trim()) return err('用户名不能为空');
     await env.LINKS.put('config:username', data.username.trim());
+    // 同步更新 config:admin 里的 user 字段，不然登录还是老用户名
+    const adminRaw = JSON.parse(await env.LINKS.get('config:admin') || '{}');
+    if (adminRaw.user) {
+      adminRaw.user = data.username.trim();
+      await env.LINKS.put('config:admin', JSON.stringify(adminRaw));
+    }
     return ok({ message: '用户名已更新' });
   }
 
