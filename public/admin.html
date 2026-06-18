@@ -239,16 +239,16 @@ init({
             class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
             🔑 修改密码
           </button>
-          <button @click="tab='username';if(window.innerWidth<1024)sidebarOpen=false"
-            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
+          <button @click="tab='username';if(window.innerWidth<1024)sidebarOpen=false" :class="sidebarClass('username')"
+            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg">
             👤 修改用户名
           </button>
-          <button @click="tab='backup';if(window.innerWidth<1024)sidebarOpen=false"
-            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
+          <button @click="tab='backup';if(window.innerWidth<1024)sidebarOpen=false" :class="sidebarClass('backup')"
+            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg">
             💾 导入/导出
           </button>
-          <button @click="tab='feedback';if(window.innerWidth<1024)sidebarOpen=false"
-            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
+          <button @click="tab='feedback';if(window.innerWidth<1024)sidebarOpen=false" :class="sidebarClass('feedback')"
+            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg">
             💬 建议反馈
           </button>
         </nav>
