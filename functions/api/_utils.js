@@ -148,7 +148,7 @@ export function buildEmailHtml(title, content, btnText, btnUrl) {
   @media(max-width:600px){body{padding:12px!important}.card{width:100%!important}}
 </style></head>
 <body style="margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB',Roboto,sans-serif">
-<table class="bg-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fef2f5,#f0eafc);padding:20px">
+<table class="bg-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:20px">
 <tr><td align="center">
 
   <!-- 信封折角装饰 -->
@@ -190,11 +190,6 @@ export function buildEmailHtml(title, content, btnText, btnUrl) {
       友链管理系统 · 自动通知<br>
       <span style="font-size:11px;color:#d1d5db">此邮件由系统自动发送，无需回复</span>
     </td></tr>
-  </table>
-
-  <!-- 外底 -->
-  <table width="100%" style="max-width:540px">
-    <tr><td style="padding:16px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">Tencent ima.copilot · 友链系统</td></tr>
   </table>
 
 </td></tr></table></body></html>`;
