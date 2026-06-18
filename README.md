@@ -1,6 +1,6 @@
 # 🪐 Astro Friends Manager
 
-> 专为 **Astro 框架 + vh-astro 主题** 打造的友链管理系统，特殊兼容 **Qexo 返回格式**。  
+> 专为 **Astro 框架 + vh-astro 主题** 打造的友链管理系统。  
 > 基于 Cloudflare Pages，零成本运行。
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/zlm6666/astro-friends-manager)
@@ -10,15 +10,24 @@
 
 ## 🎯 为什么用这个？
 
-vh-astro 主题的友链通过 API 拉取，这个系统提供两个接口：
+vh-astro 主题通过 API 拉取友链，系统提供标准 JSON 接口：
 
-| 接口 | 格式 | 用途 |
-|------|------|------|
-| `/api/links` | 标准 JSON 数组 | 大多数主题 |
-| `/api/links-qexo` | `{ data: [], status: true }` | **Qexo / vh-astro 专用** |
-| `/pub/friends` | 同 links-qexo | Qexo 配置时的短路径 |
+```
+GET /api/links
+```
 
-vh-astro 主题在 Qexo 配置里填 `/pub/friends`，直接无缝对接。
+```json
+[
+  {
+    "name": "笑的博客",
+    "link": "https://www.xiaow.qzz.io",
+    "avatar": "https://wp-cdn.4ce.cn/v2/xxx.jpeg",
+    "descr": "随性收拢生活散落的笑意"
+  }
+]
+```
+
+> 额外附带 Qexo 兼容格式 `/api/links-qexo` 和 `/pub/friends`，供其他平台使用。
 
 ---
 
@@ -30,7 +39,6 @@ vh-astro 主题在 Qexo 配置里填 `/pub/friends`，直接无缝对接。
 | 🔍 `/cheak` | 查询审核状态 |
 | 🔐 `/admin` | 审核、编辑、置顶、邮件/RSS/图床/AI 配置 |
 | 🔗 `/api/links` | 已通过友链（标准格式） |
-| 🎯 `/api/links-qexo` | Qexo 兼容格式 |
 | 📡 `/api/rss` | 友链文章聚合 |
 
 ---
@@ -68,47 +76,24 @@ vh-astro 主题在 Qexo 配置里填 `/pub/friends`，直接无缝对接。
 
 ## 🔧 vh-astro 主题对接
 
-在 Astro 项目的 Qexo 配置中：
+在 Astro 项目配置中填入 API 地址：
 
-```yaml
-# vh-astro 主题配置
-qexo:
-  url: https://你的域名.pages.dev/pub/friends
-```
-
-系统返回 Qexo 兼容格式：
-```json
-{
-  "data": [
-    {
-      "name": "笑的博客",
-      "link": "https://www.xiaow.qzz.io",
-      "avatar": "https://wp-cdn.4ce.cn/v2/xxx.jpeg",
-      "descr": "随性收拢生活散落的笑意"
-    }
-  ],
-  "status": true
-}
+```js
+// 友链数据源
+friendsApi: "https://你的域名/api/links"
 ```
 
 ---
 
 ## 📧 邮件通知（可选）
 
-- SMTP 直连：QQ 邮箱等，配置后有人申请会发邮件通知
-- Resend API：免费 100 封/天
+后台配置 SMTP 或 Resend，有人提交申请时发邮件通知管理员。
 
 ---
 
 ## 🖼️ 图床（可选）
 
-审核通过时自动上传头像到 TuCang 图床，防止对方头像挂了。
-
----
-
-## 🤖 AI 解析（可选）
-
-一键导入粘贴的非标准格式，DeepSeek AI 兜底转成标准格式填入表单。不配也能用——标准 YAML/JSON 前端直接解析。
+审核通过时自动上传头像到 TuCang，防止对方换图。
 
 ---
 
@@ -118,6 +103,8 @@ qexo:
 - URL: `https://你的域名/api/cron/refresh`
 - Header: `X-Cron-Secret: 你设的 CRON_SECRET`
 - 建议每 4 小时一次
+
+RSS 缓存数量可在后台设置（默认 20 篇）。
 
 ---
 
