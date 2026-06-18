@@ -184,20 +184,38 @@ export async function onRequestPost({ request, env }) {
           if (newStatus === 'approved') {
             const restored = oldStatus === 'rejected';
             const s = restored ? '🔄 已恢复展示' : '✅ 审核通过';
-            const content = restored
-              ? `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，好消息！</p><p style="margin:0 0 16px;color:#6b7280">您的友链已恢复展示。</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已恢复</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`
-              : `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核！</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已通过</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`;
+            const statusLabel = restored ? '已恢复' : '已通过';
+            const content = `<p>您好 <strong>${escapeHtml(record.title)}</strong>，</p>
+<p>感谢您对本站的关注与喜爱，您提交的友链申请我们已经处理完毕。</p>
+<div class="info-card">
+<p><span class="label">站点名称：</span>${escapeHtml(record.title)}</p>
+<p><span class="label">站点地址：</span>${record.link}</p>
+<p><span class="label">申请状态：</span><span class="status-badge">${statusLabel}</span></p>
+</div>
+<p>${restored?'您的友链已恢复展示。':'恭喜！您的站点符合本站的友链标准，现已成功添加至友链页面。'}</p>
+<p>期待在未来的日子里，我们能通过文字产生更多的共鸣与连接。如果您发现信息有误，或有其他事宜，欢迎随时来信交流。</p>`;
             await queueEmail(env, `${s}！${record.title}`,
-              buildEmailHtml(s, content, '查看详情', `${origin}/cheak`), record.email);
+              buildEmailHtml(s, content, '前往查看友链', 'https://blog.xiaow.qzz.io/links/'), record.email);
           } else if (newStatus === 'rejected') {
             const blocked = oldStatus === 'approved';
             const s = blocked ? '⛔ 暂时被屏蔽' : '❌ 未通过审核';
+            const statusLabel = blocked ? '已屏蔽' : '未通过';
+            const statusColor = blocked ? '#dc2626' : '#dc2626';
             const reasonBlock = record.rejectReason
-              ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 ${blocked?'原因':'拒绝原因'}：${escapeHtml(record.rejectReason)}</td></tr></table>`
+              ? `<p>原因：${escapeHtml(record.rejectReason)}</p>`
               : '';
-            const content = blocked
-              ? `<p style="margin:0 0 16px">⚠️ <b>${escapeHtml(record.title)}</b></p><p style="margin:0 0 16px;color:#6b7280">您的友链暂时被屏蔽，请检查内容是否符合规范。</p>${reasonBlock}<p style="margin:0;color:#9ca3af;font-size:13px">修改后可以重新提交恢复展示</p>`
-              : `<p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>${reasonBlock}`;
+            const content = `<p>您好 <strong>${escapeHtml(record.title)}</strong>，</p>
+<p>感谢您对本站的关注与喜爱。</p>
+<div class="info-card">
+<p><span class="label">站点名称：</span>${escapeHtml(record.title)}</p>
+<p><span class="label">站点地址：</span>${record.link}</p>
+<p><span class="label">申请状态：</span><span class="status-badge">${statusLabel}</span></p>
+</div>
+${blocked
+  ? `<p>您的友链暂时被屏蔽，请检查内容是否符合规范。</p>${reasonBlock}<p>修改后可以重新提交申请恢复展示。</p>`
+  : `<p>很抱歉，经过审核，您的站点暂时不符合本站的友链添加标准。</p>
+<p>为了保证友链圈的质量，我们通常会优先考虑<strong>内容原创度高、长期稳定更新且主题相近</strong>的博客。${reasonBlock}</p>
+<p>虽然这次未能成功，但仍然非常感谢您的支持。期待未来能在评论区见到您的身影！</p>`}`;
             await queueEmail(env, `${s} - ${record.title}`,
               buildEmailHtml(s, content, blocked ? '' : '查看详情', blocked ? '' : `${origin}/cheak`), record.email);
           }

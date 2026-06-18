@@ -133,66 +133,57 @@ export async function setList(env, key, arr) {
   await env.LINKS.put(key, JSON.stringify(arr));
 }
 
-// 精美邮件 HTML 模板（信封风格）
+// 精美邮件 HTML 模板（纯白极简风，借请求主模板改造）
 export function buildEmailHtml(title, content, btnText, btnUrl) {
   const isApproved = title.includes('通过') || title.includes('恢复');
   const isRejected = title.includes('未通过') || title.includes('屏蔽');
-  const theme = isApproved ? '#22c55e' : isRejected ? '#ef4444' : '#667eea';
-  const theme2 = isApproved ? '#16a34a' : isRejected ? '#dc2626' : '#764ba2';
+  const statusColor = isApproved ? '#16a34a' : isRejected ? '#dc2626' : '#4f46e5';
+  const statusEmoji = isApproved ? '✅' : isRejected ? '💌' : '📩';
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>友链通知</title>
 <style>
-  :root{color-scheme:light dark;supported-color-schemes:light dark}
-  @media(prefers-color-scheme:dark){.bg-wrap{background:#1a1a2e!important}.card{background:#1e1e30!important}}
-  @media(max-width:600px){body{padding:12px!important}.card{width:100%!important}}
-</style></head>
-<body style="margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB',Roboto,sans-serif">
-<table class="bg-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:20px">
-<tr><td align="center">
-
-  <!-- 信封折角装饰 -->
-  <table cellpadding="0" cellspacing="0" width="100%" style="max-width:540px">
-    <tr><td align="right" style="padding:0 2px">
-      <div style="width:0;height:0;border-left:20px solid transparent;border-top:20px solid ${theme};display:inline-block"></div>
-    </td></tr>
-  </table>
-
-  <!-- 主体卡片 -->
-  <table class="card" width="100%" style="max-width:540px;background:#fff;border-radius:0 12px 12px 12px;overflow:hidden">
-    <!-- 顶栏 -->
-    <tr><td style="background:linear-gradient(135deg,${theme},${theme2});padding:28px 32px 22px;text-align:center">
-      <p style="margin:0 0 8px;font-size:28px">${isApproved ? '🎉' : isRejected ? '💌' : '📩'}</p>
-      <p style="margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:.5px">${title}</p>
-    </td></tr>
-
-    <!-- 内容 -->
-    <tr><td style="padding:28px 32px 20px">
-      <div style="font-size:15px;line-height:1.9;color:#374151">
-        ${content}
-      </div>
-    </td></tr>
-
-    <!-- 按钮 -->
-    ${btnText && btnUrl ? `<tr><td style="padding:0 32px 28px;text-align:center">
-      <table cellpadding="0" cellspacing="0" align="center">
-        <tr><td style="background:${theme};border-radius:8px">
-          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:12px 32px;font-size:15px;font-weight:600">${btnText}</a>
-        </td></tr>
-      </table>
-    </td></tr>` : ''}
-
-    <!-- 虚线分隔 -->
-    <tr><td style="padding:0 32px"><div style="border-top:1px dashed #e5e7eb;height:0"></div></td></tr>
-
-    <!-- 底栏 -->
-    <tr><td style="padding:16px 32px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.8">
-      友链管理系统 · 自动通知<br>
-      <span style="font-size:11px;color:#d1d5db">此邮件由系统自动发送，无需回复</span>
-    </td></tr>
-  </table>
-
-</td></tr></table></body></html>`;
+body{margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color:#333;line-height:1.6}
+.email-container{max-width:600px;margin:20px auto;border:1px solid #eee;border-radius:8px;overflow:hidden}
+.email-header{padding:24px;text-align:center;border-bottom:1px solid #f0f0f0}
+.email-header h1{margin:0;font-size:20px;color:#1a1a1a;font-weight:600}
+.email-header .emoji{font-size:36px;margin-bottom:8px}
+.email-body{padding:24px;font-size:15px}
+.email-body p{margin:0 0 16px}
+.info-card{background:#fafafa;border-left:4px solid ${statusColor};padding:16px;margin:20px 0;border-radius:4px}
+.info-card p{margin:0 0 8px;word-break:break-all}
+.info-card p:last-child{margin-bottom:0}
+.label{font-weight:600;color:#555;display:inline-block;min-width:60px}
+.status-badge{display:inline-block;padding:2px 12px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;background:${statusColor}}
+.button-container{text-align:center;margin:30px 0}
+.button{display:inline-block;background:#4f46e5;color:#fff!important;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500}
+.button:hover{background:#4338ca}
+.email-footer{padding:20px 24px;text-align:center;font-size:13px;color:#888;border-top:1px solid #f0f0f0}
+@media screen and (max-width:620px){
+.email-container{margin:0;border:none;border-radius:0}
+.email-body,.email-header,.email-footer{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="email-container">
+  <div class="email-header">
+    <div class="emoji">${statusEmoji}</div>
+    <h1>${title}</h1>
+  </div>
+  <div class="email-body">
+    ${content}
+    ${btnText && btnUrl ? `<div class="button-container"><a href="${btnUrl}" class="button">${btnText}</a></div>` : ''}
+  </div>
+  <div class="email-footer">
+    友链管理系统 · 自动通知
+  </div>
+</div>
+</body>
+</html>`;
 }
 
 export function escapeHtml(s) {

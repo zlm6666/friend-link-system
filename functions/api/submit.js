@@ -66,19 +66,13 @@ export async function onRequestPost({ request, env }) {
       <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
         <tr><td style="padding:4px 0"><b style="color:#667eea">标题</b></td></tr>
         <tr><td style="padding:0 0 12px">${escapeHtml(record.title)}</td></tr>
-        <tr><td style="padding:4px 0"><b style="color:#667eea">链接</b></td></tr>
-        <tr><td style="padding:0 0 12px"><a href="${record.link}" style="color:#667eea">${record.link}</a></td></tr>
-        <tr><td style="padding:4px 0"><b style="color:#667eea">描述</b></td></tr>
-        <tr><td style="padding:0 0 12px">${escapeHtml(record.descr)}</td></tr>
-        <tr><td style="padding:4px 0"><b style="color:#667eea">RSS</b></td></tr>
-        <tr><td style="padding:0 0 12px">${record.rss ? `<a href="${record.rss}" style="color:#667eea">${record.rss}</a>` : '<span style="color:#9ca3af">未提供</span>'}</td></tr>
-        <tr><td style="padding:4px 0"><b style="color:#667eea">邮箱</b></td></tr>
-        <tr><td style="padding:0 0 12px">${record.email || '<span style="color:#9ca3af">未提供</span>'}</td></tr>
-        ${record.remark ? `<tr><td style="padding:4px 0"><b style="color:#667eea">备注</b></td></tr><tr><td style="padding:0 0 12px">${escapeHtml(record.remark)}</td></tr>` : ''}
-        ${record.prevRejectReason ? `<tr><td style="padding:4px 0"><b style="color:#ef4444">上次拒绝原因</b></td></tr><tr><td style="padding:0 0 12px;color:#991b1b">${escapeHtml(record.prevRejectReason)}</td></tr>` : ''}
+        <p><span class="label">站点地址：</span><a href="${record.link}" style="color:#4f46e5">${record.link}</a></p>
+        <p><span class="label">描述：</span>${escapeHtml(record.descr)}</p>
+        <p><span class="label">RSS：</span>${record.rss ? `<a href="${record.rss}" style="color:#4f46e5">${record.rss}</a>` : '未提供'}</p>
+        <p><span class="label">邮箱：</span>${record.email || '未提供'}</p>
       </table>`;
     await queueEmail(env, `【新友链申请】${record.title}`,
-      buildEmailHtml('📩 新友链申请', content, '前往审核', adminUrl));
+      buildEmailHtml('📩 新友链申请', content, '前往审核', `${adminUrl}`));
     await flushEmailQueue(request, env);
     }
   }
