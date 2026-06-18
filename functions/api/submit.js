@@ -73,7 +73,6 @@ export async function onRequestPost({ request, env }) {
       </table>`;
     await queueEmail(env, `【新友链申请】${record.title}`,
       buildEmailHtml('📩 新友链申请', content, '前往审核', `${adminUrl}`));
-    await flushEmailQueue(request, env);
     }
   }
 

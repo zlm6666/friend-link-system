@@ -202,19 +202,35 @@ export async function queueEmail(env, subject, html, to) {
   const bl = await env.LINKS.get(`email-blacklist:${recipient}`);
   if (bl && parseInt(bl, 10) >= 3) return;
 
-  // SMTP + 非异步：直接同步发送
-  if (cfg.provider === 'smtp') {
-    const smtpCfg = JSON.parse(await env.LINKS.get('config:smtp') || 'null');
-    if (smtpCfg && smtpCfg.asyncSmtp !== true) {
-      return sendEmail(env, subject, html, recipient)
-        .then(() => incrEmailCounter(env, recipient))
-        .catch(e => console.error('SMTP直发失败:', e.message));
-    }
-  }
-
-  // 异步入队
+  // 入队 KV
   const key = `email-queue:${Date.now()}.${Math.random().toString(36).slice(2, 6)}`;
   await env.LINKS.put(key, JSON.stringify({ subject, html, to: to || '', createdAt: Date.now() }));
+
+  // 后台尝试立即发送（不阻塞）
+  const sendInBg = async () => {
+    try {
+      if (cfg.provider === 'smtp') {
+        await sendEmail(env, subject, html, recipient);
+      } else {
+        // Resend 走 sendEmail 兼容
+        await sendEmail(env, subject, html, recipient);
+      }
+      await env.LINKS.delete(key); // 发送成功 → 从队列删
+      await incrEmailCounter(env, recipient);
+    } catch {
+      // 失败就留在队列，等 cron 重试
+    }
+  };
+  // 如果 SMTP 且没开异步，await（兼容旧行为）
+  if (cfg.provider === 'smtp') {
+    const smtpCfg = JSON.parse(await env.LINKS.get('config:smtp') || 'null');
+    if (!smtpCfg?.asyncSmtp) {
+      await sendInBg();
+      return;
+    }
+  }
+  // 异步：fire-and-forget
+  sendInBg().catch(() => {});
 }
 
 // 发送成功后递增黑名单计数（3次拉黑）
