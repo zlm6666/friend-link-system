@@ -84,6 +84,119 @@ friendsApi: "https://你的域名/api/links"
 
 ---
 
+## 📡 API 文档
+
+### 公开接口
+
+#### `GET /api/links`
+
+返回所有已通过友链，标准 JSON 数组：
+
+```json
+[
+  {
+    "name": "笑的博客",
+    "link": "https://www.xiaow.qzz.io",
+    "avatar": "https://wp-cdn.4ce.cn/v2/TVFIv5x.jpeg",
+    "descr": "随性收拢生活散落的笑意",
+    "rss": "https://blog.xiaow.qzz.io/rss.xml"
+  }
+]
+```
+
+#### `GET /api/links-qexo`
+
+Qexo 兼容格式：
+
+```json
+{
+  "data": [ { "name": "...", "link": "...", "avatar": "...", "descr": "..." } ],
+  "status": true
+}
+```
+
+> 短路径别名：`/pub/friends`
+
+#### `GET /api/status?q=关键词`
+
+查询申请状态，返回匹配的记录及审核结果。
+
+```json
+{
+  "items": [
+    {
+      "record": { "title": "笑的博客", "link": "...", ... },
+      "status": "approved"
+    }
+  ]
+}
+```
+
+#### `GET /api/rss`
+
+友链文章聚合 Feed，返回缓存的最新文章（默认 20 篇，可在后台调整）。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>友链文章聚合</title>
+    <item>
+      <title>文章标题</title>
+      <link>https://...</link>
+      <description>摘要...</description>
+      <pubDate>Wed, 18 Jun 2026 12:00:00 +0800</pubDate>
+    </item>
+  </channel>
+</rss>
+```
+
+#### `POST /api/submit`
+
+提交友链申请：
+
+```json
+{
+  "title": "笑的博客",
+  "link": "https://www.xiaow.qzz.io",
+  "avatar": "https://...",
+  "descr": "随性收拢生活散落的笑意",
+  "rss": "https://blog.xiaow.qzz.io/rss.xml",
+  "email": "me@example.com",
+  "remark": "备注"
+}
+```
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `title` | ✅ | 站点名称，最长 50 字 |
+| `link` | ✅ | 站点链接 |
+| `avatar` | ✅ | 头像 URL |
+| `descr` | ✅ | 站点描述，最长 200 字 |
+| `rss` | ❌ | RSS 订阅地址 |
+| `email` | ❌ | 接收审核结果通知 |
+| `remark` | ❌ | 备注说明 |
+
+返回：
+
+```json
+{ "ok": true, "data": { "id": "abc123" } }
+```
+
+### 管理接口（需登录）
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/admin/login` | POST | `{ "username", "password" }` → token |
+| `/api/admin/list?status=pending` | GET | 按状态列出友链 |
+| `/api/admin/review` | POST | 审核（通过/拒绝/置顶/删除/改状态） |
+| `/api/admin/config` | GET/POST | 读取/保存配置 |
+| `/api/admin/test-email` | POST | 发送测试邮件 |
+| `/api/admin/backup` | GET | 导出全部数据 |
+| `/api/admin/refresh-rss` | POST | 手动刷新 RSS |
+
+---
+
 ## 📧 邮件通知（可选）
 
 后台配置 SMTP 或 Resend，有人提交申请时发邮件通知管理员。
