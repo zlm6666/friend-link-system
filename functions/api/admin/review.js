@@ -49,7 +49,7 @@ export async function onRequestPost({ request, env }) {
           <tr><td>📅 通过时间：${new Date().toISOString().slice(0, 10)}</td></tr>
         </table>`;
       await queueEmail(env, `🎉 友链已通过！${record.title}`,
-        buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`), record.email);
+        buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/check`), record.email);
       // 立即触发发送
     }
 
@@ -83,7 +83,7 @@ export async function onRequestPost({ request, env }) {
         ${reasonBlock}
         <p style="margin:0;color:#9ca3af;font-size:13px">如果仍有疑问，可以重新提交申请</p>`;
       await queueEmail(env, `😅 友链未通过 - ${record.title}`,
-        buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`), record.email);
+        buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/check`), record.email);
       // 立即触发发送
     }
 
@@ -227,7 +227,7 @@ ${blocked
 </ul>
 <p>虽然这次未能成功，但仍然非常感谢您的支持。期待未来能在评论区见到您的身影！</p>`}`;
             await queueEmail(env, `${s} - ${record.title}`,
-              buildEmailHtml(s, content, blocked ? '' : '查看详情', blocked ? '' : `${origin}/cheak`), record.email);
+              buildEmailHtml(s, content, blocked ? '' : '查看详情', blocked ? '' : `${origin}/check`), record.email);
           }
           // 立即触发发送
         }
