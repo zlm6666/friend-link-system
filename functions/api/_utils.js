@@ -133,61 +133,70 @@ export async function setList(env, key, arr) {
   await env.LINKS.put(key, JSON.stringify(arr));
 }
 
-// 精美邮件 HTML 模板
+// 精美邮件 HTML 模板（信封风格）
 export function buildEmailHtml(title, content, btnText, btnUrl) {
-  const bgFallback = '#fafafa;background-image:linear-gradient(135deg,#f5f0ff,#eef2ff)';
+  const isApproved = title.includes('通过') || title.includes('恢复');
+  const isRejected = title.includes('未通过') || title.includes('屏蔽');
+  const theme = isApproved ? '#22c55e' : isRejected ? '#ef4444' : '#667eea';
+  const theme2 = isApproved ? '#16a34a' : isRejected ? '#dc2626' : '#764ba2';
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
 <style>
-  :root { color-scheme: light dark; supported-color-schemes: light dark; }
-  @media (prefers-color-scheme: dark) {
-    .body-bg { background:#1a1a2e !important }
-    .card-bg { background:#1e1e30 !important;border-color:#2a2a40 !important }
-    .text-main { color:#e0e0e0 !important }
-    .text-sub { color:#a0a0b0 !important }
-    .footer-bg { background:#222238 !important;border-color:#2a2a40 !important }
-    .divider { background:#2a2a40 !important }
-  }
+  :root{color-scheme:light dark;supported-color-schemes:light dark}
+  @media(prefers-color-scheme:dark){.bg-wrap{background:#1a1a2e!important}.card{background:#1e1e30!important}}
+  @media(max-width:600px){body{padding:12px!important}.card{width:100%!important}}
 </style></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',Roboto,sans-serif">
-<table class="body-bg" width="100%" cellpadding="0" cellspacing="0" style="background:${bgFallback};padding:40px 12px">
+<body style="margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB',Roboto,sans-serif">
+<table class="bg-wrap" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fef2f5,#f0eafc);padding:20px">
 <tr><td align="center">
 
-  <!-- 卡片 -->
-  <table class="card-bg" width="100%" style="max-width:540px;background:#fff;border:1px solid #e8e8f0;border-radius:10px;overflow:hidden">
-    <!-- 顶栏 -->
-    <tr><td style="background:linear-gradient(135deg,#5b6ee5,#6c4fa7);padding:0">
-      <div style="padding:30px 36px 24px;text-align:center">
-        <table cellpadding="0" cellspacing="0" align="center" style="margin-bottom:10px">
-          <tr><td style="width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%;margin:0 3px"></td>
-              <td style="width:5px;height:5px;background:rgba(255,255,255,.55);border-radius:50%;margin:0 3px"></td>
-              <td style="width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%;margin:0 3px"></td></tr>
-        </table>
-        <p style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:.3px">${title}</p>
-      </div>
-    </td></tr>
-    <!-- 内容 -->
-    <tr><td style="padding:28px 36px 20px">
-      <div class="text-main" style="font-size:15px;line-height:1.8;color:#374151">
-        ${content}
-      </div>
-    </td></tr>
-    <!-- 按钮 -->
-    ${btnText && btnUrl ? `<tr><td style="padding:0 36px 28px;text-align:center">
-      <table cellpadding="0" cellspacing="0" align="center">
-        <tr><td style="background:#5b6ee5;border-radius:7px">
-          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:12px 30px;font-size:14px;font-weight:600">${btnText}</a>
-        </td></tr>
-      </table>
-    </td></tr>` : ''}
-    <!-- 底栏 -->
-    <tr class="footer-bg"><td style="padding:16px 36px;background:#fafafd;border-top:1px solid #f0f0f8;text-align:center;font-size:11px;color:#a0a0b8;line-height:1.8">
-      友链管理系统 · 自动通知，请勿回复
+  <!-- 信封折角装饰 -->
+  <table cellpadding="0" cellspacing="0" width="100%" style="max-width:540px">
+    <tr><td align="right" style="padding:0 2px">
+      <div style="width:0;height:0;border-left:20px solid transparent;border-top:20px solid ${theme};display:inline-block"></div>
     </td></tr>
   </table>
 
-  <div class="text-sub" style="padding:14px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">Tencent ima.copilot</div>
+  <!-- 主体卡片 -->
+  <table class="card" width="100%" style="max-width:540px;background:#fff;border-radius:0 12px 12px 12px;overflow:hidden">
+    <!-- 顶栏 -->
+    <tr><td style="background:linear-gradient(135deg,${theme},${theme2});padding:28px 32px 22px;text-align:center">
+      <p style="margin:0 0 8px;font-size:28px">${isApproved ? '🎉' : isRejected ? '💌' : '📩'}</p>
+      <p style="margin:0;color:#fff;font-size:20px;font-weight:700;letter-spacing:.5px">${title}</p>
+    </td></tr>
+
+    <!-- 内容 -->
+    <tr><td style="padding:28px 32px 20px">
+      <div style="font-size:15px;line-height:1.9;color:#374151">
+        ${content}
+      </div>
+    </td></tr>
+
+    <!-- 按钮 -->
+    ${btnText && btnUrl ? `<tr><td style="padding:0 32px 28px;text-align:center">
+      <table cellpadding="0" cellspacing="0" align="center">
+        <tr><td style="background:${theme};border-radius:8px">
+          <a href="${btnUrl}" style="display:inline-block;color:#fff;text-decoration:none;padding:12px 32px;font-size:15px;font-weight:600">${btnText}</a>
+        </td></tr>
+      </table>
+    </td></tr>` : ''}
+
+    <!-- 虚线分隔 -->
+    <tr><td style="padding:0 32px"><div style="border-top:1px dashed #e5e7eb;height:0"></div></td></tr>
+
+    <!-- 底栏 -->
+    <tr><td style="padding:16px 32px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.8">
+      友链管理系统 · 自动通知<br>
+      <span style="font-size:11px;color:#d1d5db">此邮件由系统自动发送，无需回复</span>
+    </td></tr>
+  </table>
+
+  <!-- 外底 -->
+  <table width="100%" style="max-width:540px">
+    <tr><td style="padding:16px 10px 0;text-align:center;font-size:11px;color:#c0c5d1">Tencent ima.copilot · 友链系统</td></tr>
+  </table>
+
 </td></tr></table></body></html>`;
 }
 
