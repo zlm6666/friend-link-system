@@ -178,19 +178,28 @@ export async function onRequestPost({ request, env }) {
           await setList(env, `link:list:${newStatus}`, newList);
 
           // 发通知
-          if (notify && record.email) {
+          if (notify && record.email && newStatus !== 'pending') {
           const origin = new URL(request.url).origin;
+          const oldStatus = status;
           if (newStatus === 'approved') {
-            const content = `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核！</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已通过</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`;
-            await queueEmail(env, `🎉 友链已通过！${record.title}`,
-              buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/cheak`), record.email);
+            const restored = oldStatus === 'rejected';
+            const s = restored ? '🔄 已恢复展示' : '✅ 审核通过';
+            const content = restored
+              ? `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，好消息！</p><p style="margin:0 0 16px;color:#6b7280">您的友链已恢复展示。</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已恢复</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`
+              : `<p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请已通过审核！</p><table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151"><tr><td>✅ 状态：已通过</td></tr><tr><td>📅 时间：${new Date().toISOString().slice(0, 10)}</td></tr></table>`;
+            await queueEmail(env, `${s}！${record.title}`,
+              buildEmailHtml(s, content, '查看详情', `${origin}/cheak`), record.email);
           } else if (newStatus === 'rejected') {
+            const blocked = oldStatus === 'approved';
+            const s = blocked ? '⛔ 暂时被屏蔽' : '❌ 未通过审核';
             const reasonBlock = record.rejectReason
-              ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
+              ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 ${blocked?'原因':'拒绝原因'}：${escapeHtml(record.rejectReason)}</td></tr></table>`
               : '';
-            const content = `<p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>${reasonBlock}`;
-            await queueEmail(env, `😅 友链未通过 - ${record.title}`,
-              buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/cheak`), record.email);
+            const content = blocked
+              ? `<p style="margin:0 0 16px">⚠️ <b>${escapeHtml(record.title)}</b></p><p style="margin:0 0 16px;color:#6b7280">您的友链暂时被屏蔽，请检查内容是否符合规范。</p>${reasonBlock}<p style="margin:0;color:#9ca3af;font-size:13px">修改后可以重新提交恢复展示</p>`
+              : `<p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p><p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>${reasonBlock}`;
+            await queueEmail(env, `${s} - ${record.title}`,
+              buildEmailHtml(s, content, blocked ? '' : '查看详情', blocked ? '' : `${origin}/cheak`), record.email);
           }
           // 立即触发发送
           await flushEmailQueue(request, env);

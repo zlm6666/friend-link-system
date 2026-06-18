@@ -125,6 +125,10 @@
             class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
             🔑 修改密码
           </button>
+          <button @click="tab='username';showSidebar=false"
+            class="sidebar-link w-full text-left px-4 py-2.5 rounded-lg text-white/80 hover:bg-white/5">
+            👤 修改用户名
+          </button>
         </nav>
 
         <div class="hidden lg:block mt-auto pt-4">
@@ -354,6 +358,26 @@
           </div>
         </div>
 
+        <!-- === 修改用户名 === -->
+        <div x-show="tab==='username'">
+          <h2 class="text-2xl font-bold text-white mb-4">👤 修改用户名</h2>
+          <div class="card rounded-xl p-6 shadow max-w-md">
+            <form @submit.prevent="changeUsername" class="space-y-3">
+              <div>
+                <label class="block text-sm text-gray-700 mb-1 font-medium">当前用户名</label>
+                <input x-model="usernameInfo" type="text" disabled class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500">
+              </div>
+              <div>
+                <label class="block text-sm text-gray-700 mb-1 font-medium">新用户名</label>
+                <input x-model="usernameForm.newName" type="text" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400" placeholder="新用户名">
+              </div>
+              <button type="submit" :disabled="saving" class="btn bg-blue-500 text-white px-5 py-2 rounded-lg">保存</button>
+              <div x-show="usernameMsg" class="text-sm px-3 py-2 rounded-lg"
+                :class="usernameOk?'bg-green-50 text-green-700':'bg-red-50 text-red-700'" x-text="usernameMsg"></div>
+            </form>
+          </div>
+        </div>
+
         <!-- === 编辑弹窗 === -->
         <div x-show="editModal" x-transition.opacity class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" @click.self="editModal=false">
           <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" @click.stop>
@@ -482,6 +506,7 @@ function admin() {
     },
     saving: false, testing: false, testEmailType: 'test', emailMsg: '', emailOk: false, tuCangMsg: '', tuCangOk: false,
     pwdForm: { old: '', new: '', cfm: '' }, pwdMsg: '', pwdOk: false,
+    usernameForm: { newName: '' }, usernameInfo: 'admin', usernameMsg: '', usernameOk: false,
     editModal: false, editForm: { id: '', title: '', avatar: '', link: '', descr: '', rss: '' },
     editMsg: '', editOk: false, confirmDelete: null,
     statusModal: false, statusItem: null, statusNew: 'approved', statusReason: '',
@@ -654,6 +679,8 @@ function admin() {
     confirmChangeStatus() {
       this.notifyId = this.statusItem.id;
       this.statusModal = false;
+      // 已通过→待审核：直接执行，不弹通知
+      if (this.statusNew === 'pending') { this.doChangeStatus(false); return; }
       this.notifyModal = true;
     },
 
@@ -741,6 +768,7 @@ function admin() {
           if (d.data?.smtp) this.smtpCfg = { ...this.smtpCfg, ...d.data.smtp };
           if (d.data?.tuCang) this.tuCangCfg = { ...this.tuCangCfg, ...d.data.tuCang };
           if (d.data?.ai) this.aiCfg = { ...this.aiCfg, ...d.data.ai };
+          if (d.data?.username) this.usernameInfo = d.data.username;
         }
       } catch {}
     },
@@ -826,6 +854,26 @@ function admin() {
           setTimeout(() => this.logout(), 1500);
         } else { this.pwdMsg = d.error || '修改失败'; }
       } catch { this.pwdMsg = '网络错误'; } finally { this.saving = false; }
+    },
+
+    async changeUsername() {
+      this.saving = true; this.usernameMsg = ''; this.usernameOk = false;
+      try {
+        const r = await this.api('/api/admin/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'username', username: this.usernameForm.newName })
+        });
+        if (r.ok) {
+          this.usernameInfo = this.usernameForm.newName;
+          this.usernameForm.newName = '';
+          this.usernameMsg = '✅ 用户名已更新，下次登录生效';
+          this.usernameOk = true;
+        } else {
+          const d = await r.json();
+          this.usernameMsg = d.error || '保存失败';
+        }
+      } catch { this.usernameMsg = '网络错误'; } finally { this.saving = false; }
     },
 
     formatDate(s) {

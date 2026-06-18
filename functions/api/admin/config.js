@@ -15,11 +15,13 @@ export async function onRequestGet({ request, env }) {
     token: obj.token ? '******' : '',
     password: obj.password ? '******' : ''
   } : null;
+  const username = await env.LINKS.get('config:username') || 'admin';
   return ok({
     email: safe(email),
     tuCang: safe(tuCang),
     ai: safe(ai),
-    smtp: safe(smtp)
+    smtp: safe(smtp),
+    username
   });
 }
 
@@ -87,6 +89,12 @@ export async function onRequestPost({ request, env }) {
     if (!data.apiKey) return err('API Key 必填');
     await env.LINKS.put('config:ai', JSON.stringify({ apiKey: data.apiKey.trim() }));
     return ok({ message: 'AI 配置已保存' });
+  }
+
+  if (type === 'username') {
+    if (!data.username || !data.username.trim()) return err('用户名不能为空');
+    await env.LINKS.put('config:username', data.username.trim());
+    return ok({ message: '用户名已更新' });
   }
 
   return err('未知 type');
