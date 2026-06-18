@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>友链管理系统</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css">
+<script src="https://unpkg.com/@waline/client@v3/dist/waline.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 <style>
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
@@ -407,11 +409,16 @@
         <!-- === 建议反馈 === -->
         <div x-show="tab==='feedback'">
           <h2 class="text-2xl font-bold text-white mb-4">💬 建议反馈</h2>
-          <div class="card rounded-xl p-6 shadow max-w-md">
-            <p class="text-sm text-gray-600 mb-4">有任何建议或遇到问题？欢迎通过以下方式反馈：</p>
-            <a href="https://github.com/zlm6666/friend-link-system/issues" target="_blank"
-              class="btn bg-gray-800 text-white px-5 py-2 rounded-lg text-sm inline-block mb-4">🐙 GitHub Issues</a>
-            <p class="text-xs text-gray-400">也欢迎直接 PR 贡献代码 ✌️</p>
+          <div class="card rounded-xl p-6 shadow max-w-lg">
+            <p class="text-sm text-gray-600 mb-2">有任何建议或遇到问题？欢迎反馈：</p>
+            <div class="flex gap-3 mb-5">
+              <a href="https://github.com/zlm6666/friend-link-system/issues" target="_blank"
+                class="btn bg-gray-800 text-white px-4 py-2 rounded-lg text-sm">🐙 GitHub Issues</a>
+            </div>
+            <div class="border-t border-gray-100 pt-4">
+              <p class="text-xs text-gray-400 mb-3">或直接在下方评论（与博客共用评论区）</p>
+              <div id="waline"></div>
+            </div>
           </div>
         </div>
 
@@ -517,6 +524,20 @@
           :class="toast.ok?'bg-green-600 text-white':'bg-red-600 text-white'" x-text="toast.msg"></div>
 
       </main>
+
+      <script>
+      // Waline 评论区（多域名下 path 相同评论互通）
+      Waline.init({
+        el: '#waline',
+        serverURL: 'https://waline.xiaow.qzz.io',
+        path: '/admin',
+        lang: 'zh-CN',
+        dark: false,
+        requiredMeta: ['nick'],
+        emoji: ['https://unpkg.com/@waline/emojis@1.2.0/alus'],
+        pageSize: 10
+      });
+      </script>
     </div>
   </div>
 </div>
