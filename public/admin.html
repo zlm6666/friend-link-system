@@ -724,6 +724,7 @@ function admin() {
           this.counts.pending = d.data?.total || 0;
         } else if (r.status === 401) {
           localStorage.removeItem('admin_token');
+          this.loginError = '会话已过期，请重新登录';
         }
       } catch {}
     },
@@ -776,7 +777,7 @@ function admin() {
         try {
           const r = await this.api(`/api/admin/list?status=${st}`);
           if (r.ok) { const d = await r.json(); this.counts[st] = d.data?.total || 0; }
-          else if (r.status === 401) { this.loggedIn = false; return; }
+          else if (r.status === 401) { localStorage.removeItem('admin_token'); this.loggedIn = false; this.loginError = '会话已过期，请重新登录'; return; }
         } catch {}
       }
     },
@@ -785,7 +786,7 @@ function admin() {
       this.loading = true;
       try {
         const r = await this.api(`/api/admin/list?status=${status}`);
-        if (r.status === 401) { this.loggedIn = false; return; }
+        if (r.status === 401) { localStorage.removeItem('admin_token'); this.loggedIn = false; this.loginError = '会话已过期，请重新登录'; return; }
         const d = await r.json();
         this.list = d.data?.list || [];
       } catch { this.showToast('加载失败', false); } finally { this.loading = false; }
