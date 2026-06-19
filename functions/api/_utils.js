@@ -140,22 +140,22 @@ export function buildEmailHtml(title, content, btnText, btnUrl) {
   const statusColor = isApproved ? '#16a34a' : isRejected ? '#dc2626' : '#4f46e5';
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>友链通知</title>
-<style>body{color-scheme:only light}</style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>友链通知</title>
+<style>body{color-scheme:only light}@media screen and (max-width:620px){.wrap{width:100%!important}.inner{padding:12px!important}}</style>
 </head>
 <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="#ffffff" text="#333333">
 <img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="1" height="1" style="display:block">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
   <tr><td align="center" bgcolor="#ffffff" style="padding:20px 10px">
-    <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="border:1px solid #eeeeee;border-radius:8px">
-      <tr><td bgcolor="#ffffff" style="padding:24px;text-align:center;border-bottom:1px solid #f0f0f0">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="border:1px solid #eeeeee;border-radius:8px" class="wrap">
+      <tr><td bgcolor="#ffffff" style="padding:24px;text-align:center;border-bottom:1px solid #f0f0f0" class="inner">
         <font size="4" face="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"><b>${title}</b></font>
       </td></tr>
-      <tr><td bgcolor="#ffffff" style="padding:24px;font-size:15px">
+      <tr><td bgcolor="#ffffff" style="padding:24px;font-size:15px" class="inner">
         ${content}
         ${btnText && btnUrl ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff"><tr><td align="center" bgcolor="#ffffff" style="padding-top:24px"><a href="${btnUrl}" target="_blank" style="display:inline-block;padding:12px 28px;border-radius:6px;font-weight:500;background-color:#5046e4;color:#ffffff;text-decoration:none"><font color="#ffffff">${btnText}</font></a></td></tr></table>` : ''}
       </td></tr>
-      <tr><td bgcolor="#ffffff" style="padding:20px 24px;text-align:center;border-top:1px solid #f0f0f0;font-size:13px">
+      <tr><td bgcolor="#ffffff" style="padding:20px 24px;text-align:center;border-top:1px solid #f0f0f0;font-size:13px" class="inner">
         <font color="#888888">此为系统自动发送的邮件，请勿直接回复。</font>
       </td></tr>
     </table>
