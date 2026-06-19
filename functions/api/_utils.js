@@ -144,44 +144,32 @@ export function buildEmailHtml(title, content, btnText, btnUrl) {
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light only">
 <meta name="supported-color-schemes" content="light only">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no">
 <title>友链通知</title>
-<style>
-html{color-scheme:light only!important}
-body{margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color:#333;line-height:1.6}
-.email-container{max-width:600px;margin:20px auto;border:1px solid #eee;border-radius:8px;overflow:hidden}
-.email-header{padding:24px;text-align:center;border-bottom:1px solid #f0f0f0;background:#ffffff}
-.email-header h1{margin:0;font-size:20px;color:#1a1a1a;font-weight:600}
-.email-body{padding:24px;font-size:15px;background:#ffffff;color:#333}
-.email-body p{margin:0 0 16px;color:#333}
-.email-body li{color:#333}
-.info-card{background:#1a1a2e;border-left:4px solid #5046e4;padding:16px;margin:20px 0;border-radius:4px}
-.info-card p{margin:0 0 8px;word-break:break-all;color:#ffffff}
-.info-card p:last-child{margin-bottom:0}
-.info-card .label{font-weight:600;color:#adb5bd;display:inline-block;min-width:60px}
-.button-container{text-align:center;margin:30px 0}
-.button{display:inline-block;background:#4f46e5;color:#fff!important;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500}
-.button:hover{background:#4338ca}
-.email-footer{padding:20px 24px;text-align:center;font-size:13px;color:#888;border-top:1px solid #f0f0f0;background:#ffffff}
-@media screen and (max-width:620px){
-.email-container{margin:0;border:none;border-radius:0}
-.email-body,.email-header,.email-footer{padding:20px}
-}
-</style>
 </head>
-<body style="margin:0;padding:0;background:#ffffff;color:#333">
-<div class="email-container">
-  <div class="email-header">
-    <h1 style="margin:0;color:#1a1a1a">${title}</h1>
-  </div>
-  <div class="email-body" style="color:#333">
-    ${content}
-    ${btnText && btnUrl ? `<div class="button-container"><a href="${btnUrl}" class="button" style="color:#fff">${btnText}</a></div>` : ''}
-  </div>
-  <div class="email-footer" style="color:#888">
-    此为系统自动发送的邮件，请勿直接回复。
-  </div>
-</div>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" style="margin:0;padding:0;background-color:#ffffff;background:#ffffff">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff">
+  <tr><td align="center" bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;padding:20px 10px">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;border:1px solid #eeeeee;border-radius:8px">
+      <!-- 头部 -->
+      <tr><td bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;padding:24px;text-align:center;border-bottom:1px solid #f0f0f0">
+        <font color="#1a1a1a" size="4" face="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif" style="color:#1a1a1a"><b>${title}</b></font>
+      </td></tr>
+      <!-- 正文 -->
+      <tr><td bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;padding:24px;font-size:15px">
+        <font color="#333333" face="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif" style="color:#333333">${content}</font>
+        ${btnText && btnUrl ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;text-align:center;margin:30px 0"><tr><td bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;text-align:center;padding:0"><a href="${btnUrl}" target="_blank" style="display:inline-block;background-color:#5046e4;background:#5046e4;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500"><font color="#ffffff" style="color:#ffffff">${btnText}</font></a></td></tr></table>` : ''}
+      </td></tr>
+      <!-- 页脚 -->
+      <tr><td bgcolor="#ffffff" style="background-color:#ffffff;background:#ffffff;padding:20px 24px;text-align:center;border-top:1px solid #f0f0f0;font-size:13px">
+        <font color="#888888" style="color:#888888">此为系统自动发送的邮件，请勿直接回复。</font>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
 </body>
 </html>`;
 }

@@ -42,13 +42,12 @@ export async function onRequestPost({ request, env }) {
     if (record.email) {
       const origin = new URL(request.url).origin;
       const content = `
-        <p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p>
-        <p style="margin:0 0 16px;color:#6b7280;-webkit-text-fill-color:#6b7280">您的友链申请已通过审核，现在已展示在友链列表中。</p>
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f0fdf4;background-color:#f0fdf4;border-radius:8px;font-size:13px;color:#374151;-webkit-text-fill-color:#374151">
-          <tr><td style="padding:12px 16px 4px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">✅ 状态：已通过</td></tr>
-          <tr><td style="padding:4px 16px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">📅 通过时间：${record.approvedAt ? record.approvedAt.slice(0, 10) : new Date().toISOString().slice(0, 10)}</td></tr>
-          <tr><td style="padding:4px 16px 12px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">🔗 你可在此看到你的链接：<a href="https://blog.xiaow.qzz.io/links/" style="color:#4f46e5;-webkit-text-fill-color:#4f46e5;text-decoration:underline">blog.xiaow.qzz.io/links</a></td></tr>
-        </table>`;
+        <font color="#333333" style="color:#333333"><b>${escapeHtml(record.title)}</b>，恭喜！</font>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;border-radius:8px;margin:16px 0"><tr><td bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;padding:12px 16px">
+          <font color="#374151" style="color:#374151">✅ 状态：已通过</font><br>
+          <font color="#374151" style="color:#374151">📅 通过时间：${record.approvedAt ? record.approvedAt.slice(0, 10) : new Date().toISOString().slice(0, 10)}</font><br>
+          <font color="#374151" style="color:#374151">🔗 你可在此看到你的链接：</font><a href="https://blog.xiaow.qzz.io/links/" target="_blank" style="color:#5046e4"><font color="#5046e4" style="color:#5046e4">blog.xiaow.qzz.io/links</font></a>
+        </td></tr></table>`;
       await queueEmail(env, `🎉 友链已通过！${record.title}`,
         buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/check`), record.email);
       // 立即触发发送
@@ -76,13 +75,13 @@ export async function onRequestPost({ request, env }) {
     if (record.email) {
       const origin = new URL(request.url).origin;
       const reasonBlock = record.rejectReason
-        ? `<table width="100%" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin:0 0 16px"><tr><td>📌 拒绝原因：${escapeHtml(record.rejectReason)}</td></tr></table>`
+        ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fef2f2" style="background-color:#fef2f2;background:#fef2f2;border-radius:8px;margin:0 0 16px"><tr><td bgcolor="#fef2f2" style="background-color:#fef2f2;background:#fef2f2;padding:12px 16px"><font color="#991b1b" style="color:#991b1b">📌 拒绝原因：${escapeHtml(record.rejectReason)}</font></td></tr></table>`
         : '';
       const content = `
-        <p style="margin:0 0 16px">😅 <b>${escapeHtml(record.title)}</b>，很抱歉</p>
-        <p style="margin:0 0 16px;color:#6b7280">您的友链申请未通过审核。</p>
+        <font color="#333333" style="color:#333333"><b>${escapeHtml(record.title)}</b>，很抱歉</font>
+        <font color="#6b7280" style="color:#6b7280">您的友链申请未通过审核。</font>
         ${reasonBlock}
-        <p style="margin:0;color:#9ca3af;font-size:13px">如果仍有疑问，可以重新提交申请</p>`;
+        <font color="#9ca3af" style="color:#9ca3af">如果仍有疑问，可以重新提交申请</font>`;
       await queueEmail(env, `😅 友链未通过 - ${record.title}`,
         buildEmailHtml('❌ 未通过审核', content, '查看详情', `${origin}/check`), record.email);
       // 立即触发发送
