@@ -44,10 +44,10 @@ export async function onRequestPost({ request, env }) {
       const content = `
         <p style="margin:0 0 16px">🎉 <b>${escapeHtml(record.title)}</b>，恭喜！</p>
         <p style="margin:0 0 16px;color:#6b7280;-webkit-text-fill-color:#6b7280">您的友链申请已通过审核，现在已展示在友链列表中。</p>
-        <table width="100%" style="background:#f0fdf4;border-radius:8px;padding:12px 16px;font-size:13px;color:#374151;-webkit-text-fill-color:#374151">
-          <tr><td style="padding:2px 0">✅ 状态：已通过</td></tr>
-          <tr><td style="padding:2px 0">📅 通过时间：${new Date().toISOString().slice(0, 10)}</td></tr>
-          <tr><td style="padding:2px 0">🔗 你可在此看到你的链接：<a href="https://blog.xiaow.qzz.io/links/" style="color:#4f46e5;-webkit-text-fill-color:#4f46e5;text-decoration:underline">blog.xiaow.qzz.io/links</a></td></tr>
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f0fdf4;background-color:#f0fdf4;border-radius:8px;font-size:13px;color:#374151;-webkit-text-fill-color:#374151">
+          <tr><td style="padding:12px 16px 4px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">✅ 状态：已通过</td></tr>
+          <tr><td style="padding:4px 16px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">📅 通过时间：${record.approvedAt ? record.approvedAt.slice(0, 10) : new Date().toISOString().slice(0, 10)}</td></tr>
+          <tr><td style="padding:4px 16px 12px;background:#f0fdf4;background-color:#f0fdf4;color:#374151;-webkit-text-fill-color:#374151">🔗 你可在此看到你的链接：<a href="https://blog.xiaow.qzz.io/links/" style="color:#4f46e5;-webkit-text-fill-color:#4f46e5;text-decoration:underline">blog.xiaow.qzz.io/links</a></td></tr>
         </table>`;
       await queueEmail(env, `🎉 友链已通过！${record.title}`,
         buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/check`), record.email);
