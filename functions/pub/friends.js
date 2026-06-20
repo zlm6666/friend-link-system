@@ -1,3 +1,7 @@
 // functions/pub/friends.js
-// 路由 /pub/friends → /api/links-qexo（Qexo 兼容格式友链）
-export { onRequestGet, onRequestOptions } from '../api/links-qexo.js';
+// Qexo 兼容路径：/pub/friends → 路由到 /api/links-qexo
+import { onRequestGet as qexoGet, onRequestPost as qexoPost, onRequestOptions as qexoOptions } from '../api/links-qexo.js';
+
+export const onRequestGet = qexoGet;
+export const onRequestPost = qexoPost;
+export const onRequestOptions = qexoOptions;
