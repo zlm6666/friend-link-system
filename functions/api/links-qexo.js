@@ -1,8 +1,14 @@
 // functions/api/links-qexo.js
 // Qexo 兼容格式的友链 API
-import { getList } from './_utils.js';
+import { getList, globalRateLimit } from './_utils.js';
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ env, request }) {
+  if (!(await globalRateLimit(env, 'links-qexo', 100, 60))) {
+    return new Response(JSON.stringify({ error: '请求过于频繁' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
   const ids = await getList(env, 'link:list:approved');
   const items = [];
   for (const id of ids) {
