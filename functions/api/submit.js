@@ -22,12 +22,18 @@ export async function onRequestPost({ request, env }) {
     return err('请求体不是合法 JSON');
   }
 
-  // 表单令牌验证（防止 API 直接调用）
+  // 表单令牌验证（无状态 HMAC 签名，不碰 KV）
   const token = body._token;
   if (!token) return err('缺少表单令牌，请通过页面提交', 403);
-  const tokenValid = await env.LINKS.get(`form:token:${token}`);
-  if (!tokenValid) return err('表单令牌无效或已过期，请刷新页面重试', 403);
-  await env.LINKS.delete(`form:token:${token}`);
+  const parts = token.split('-');
+  if (parts.length !== 2) return err('令牌格式错误', 403);
+  const ts = parseInt(parts[0], 36);
+  if (isNaN(ts) || Date.now() - ts > 300000) return err('令牌已过期，请刷新页面', 403);
+  const secret = env.CRON_SECRET || env.LINKS?.id || 'fr1end-l1nk';
+  const raw = parts[0] + ':' + secret;
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  const sig = Array.from(new Uint8Array(hash)).slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
+  if (sig !== parts[1]) return err('令牌无效', 403);
   const errors = validateLink(body);
   if (errors.length) return err('校验失败', 400, { errors });
 
