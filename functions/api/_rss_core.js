@@ -21,7 +21,8 @@ const DEFAULT_FEEDS = [
 export async function getAllFeeds(env) {
   const ids = await getList(env, 'link:list:approved');
   const feeds = new Set();
-  // 用 BLOG_URL 替换默认源中的 hardcoded 域名
+  DEFAULT_FEEDS.forEach(f => feeds.add(f));
+  // BLOG_URL 环境变量覆盖默认源
   if (env.BLOG_URL) {
     feeds.add(new URL('/rss.xml', env.BLOG_URL).href);
   }
