@@ -23,6 +23,7 @@ export async function onRequestPost({ request, env }) {
     if (!pending.includes(id)) return err('记录不存在');
     const record = JSON.parse(await env.LINKS.get(`link:pending:${id}`) || 'null');
     if (!record) return err('记录不存在');
+    const blogUrl = (env.BLOG_URL || 'https://blog.xiaow.qzz.io').replace(/\/+$/, '');
 
     // 上传头像到图床
     const up = await uploadToTuCang(env, record.avatar);
@@ -46,7 +47,7 @@ export async function onRequestPost({ request, env }) {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;border-radius:8px;margin:16px 0"><tr><td bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;padding:12px 16px">
           <font color="#374151" style="color:#374151">✅ 状态：已通过</font><br>
           <font color="#374151" style="color:#374151">📅 通过时间：${record.approvedAt ? record.approvedAt.slice(0, 10) : new Date().toISOString().slice(0, 10)}</font><br>
-          <font color="#374151" style="color:#374151">🔗 你可在此看到你的链接：</font><a href="https://blog.xiaow.qzz.io/links/" target="_blank" style="color:#5046e4"><font color="#5046e4" style="color:#5046e4">blog.xiaow.qzz.io/links</font></a>
+          <font color="#374151" style="color:#374151">🔗 你可在此看到你的链接：</font><a href="${blogUrl}/links/" target="_blank" style="color:#5046e4"><font color="#5046e4" style="color:#5046e4">${blogUrl.replace(/^https?:\/\//, '')}/links</font></a>
         </td></tr></table>`;
       await queueEmail(env, `🎉 友链已通过！${record.title}`,
         buildEmailHtml('✅ 审核通过', content, '查看详情', `${origin}/check`), record.email);
@@ -199,8 +200,9 @@ export async function onRequestPost({ request, env }) {
 </div>
 <p>${restored?'您的友链已恢复展示。':'恭喜！您的站点符合本站的友链标准，现已成功添加至友链页面。'}</p>
 <p>期待在未来的日子里，我们能通过文字产生更多的共鸣与连接。如果您发现信息有误，或有其他事宜，欢迎随时来信交流。</p>`;
+            const blogUrl = (env.BLOG_URL || 'https://blog.xiaow.qzz.io').replace(/\/+$/, '');
             await queueEmail(env, `${s}！${record.title}`,
-              buildEmailHtml(s, content, '前往查看友链', 'https://blog.xiaow.qzz.io/links/'), record.email);
+              buildEmailHtml(s, content, '前往查看友链', `${blogUrl}/links/`), record.email);
           } else if (newStatus === 'rejected') {
             const blocked = oldStatus === 'approved';
             const s = blocked ? '⛔ 暂时被屏蔽' : '❌ 未通过审核';

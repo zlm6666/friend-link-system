@@ -21,6 +21,10 @@ const DEFAULT_FEEDS = [
 export async function getAllFeeds(env) {
   const ids = await getList(env, 'link:list:approved');
   const feeds = new Set();
+  // 用 BLOG_URL 替换默认源中的 hardcoded 域名
+  if (env.BLOG_URL) {
+    feeds.add(new URL('/rss.xml', env.BLOG_URL).href);
+  }
   for (const id of ids) {
     const r = JSON.parse(await env.LINKS.get(`link:approved:${id}`) || 'null');
     if (r?.rss) feeds.add(r.rss.trim());

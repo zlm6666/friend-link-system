@@ -34,11 +34,12 @@ export async function onRequestPost({ request, env }) {
       success++;
       // 发通知
       if (record.email) {
+        const blogUrl = (env.BLOG_URL || 'https://blog.xiaow.qzz.io').replace(/\/+$/, '');
         const content = `<font color="#333333" style="color:#333333"><b>${escapeHtml(record.title)}</b>，恭喜！</font>
           <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;border-radius:8px;margin:16px 0"><tr><td bgcolor="#f0fdf4" style="background-color:#f0fdf4;background:#f0fdf4;padding:12px 16px">
             <font color="#374151" style="color:#374151">✅ 状态：已通过</font><br>
             <font color="#374151" style="color:#374151">📅 通过时间：${record.approvedAt.slice(0, 10)}</font><br>
-            <font color="#374151" style="color:#374151">🔗 你可在此看到你的链接：</font><a href="https://blog.xiaow.qzz.io/links/" target="_blank" style="color:#5046e4"><font color="#5046e4" style="color:#5046e4">blog.xiaow.qzz.io/links</font></a>
+            <font color="#374151" style="color:#374151">🔗 你可在此看到你的链接：</font><a href="${blogUrl}/links/" target="_blank" style="color:#5046e4"><font color="#5046e4" style="color:#5046e4">${blogUrl.replace(/^https?:\/\//, '')}/links</font></a>
           </td></tr></table>`;
         await queueEmail(env, `🎉 友链已通过！${record.title}`,
           buildEmailHtml('✅ 审核通过', content, '查看详情', `${new URL(request.url).origin}/check`), record.email);

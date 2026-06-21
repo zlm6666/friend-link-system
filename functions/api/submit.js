@@ -9,9 +9,10 @@ export async function onRequestGet() {
 }
 
 export async function onRequestPost({ request, env }) {
-  // Referer 来源检查（防直接 curl 调 API）
+  // Referer 来源检查（防直接 curl 调 API，动态匹配当前域名）
   const ref = request.headers.get('Referer') || request.headers.get('Origin') || '';
-  if (!ref || (!ref.includes('friends.xiaow.qzz.io') && !ref.includes('blog.xiaow.qzz.io') && !ref.includes('localhost') && !ref.includes('127.0.0.1'))) {
+  const host = new URL(request.url).hostname;
+  if (!ref || !ref.includes(host)) {
     return new Response(JSON.stringify({ error: '请通过页面提交' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
