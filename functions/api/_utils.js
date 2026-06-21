@@ -136,7 +136,7 @@ export async function globalRateLimit(env, prefix, maxReq, windowSec) {
 export function validateLink(data) {
   const errors = [];
   if (!data.title || data.title.length > 50) errors.push('标题必填且不超过50字');
-  if (!data.link || !/^https?:\/\//i.test(data.link)) errors.push('链接必须以 http/https 开头');
+  if (!data.link || !/^https?:\/\/[^/]+(?:\/)?$/i.test(data.link)) errors.push('链接格式错误，仅支持根域名，如 https://example.com');
   if (!data.avatar || !/^https?:\/\//i.test(data.avatar)) errors.push('头像必须以 http/https 开头');
   if (!data.descr || data.descr.length > 200) errors.push('描述必填且不超过200字');
   if (data.rss && !/^https?:\/\//i.test(data.rss)) errors.push('RSS 必须以 http/https 开头');
