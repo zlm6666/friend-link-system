@@ -21,6 +21,13 @@ export async function onRequestPost({ request, env }) {
   } catch {
     return err('请求体不是合法 JSON');
   }
+
+  // 表单令牌验证（防止 API 直接调用）
+  const token = body._token;
+  if (!token) return err('缺少表单令牌，请通过页面提交', 403);
+  const tokenValid = await env.LINKS.get(`form:token:${token}`);
+  if (!tokenValid) return err('表单令牌无效或已过期，请刷新页面重试', 403);
+  await env.LINKS.delete(`form:token:${token}`);
   const errors = validateLink(body);
   if (errors.length) return err('校验失败', 400, { errors });
 

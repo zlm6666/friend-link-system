@@ -325,6 +325,10 @@ rss: https://blog.xiaow.qzz.io/rss.xml"></textarea>
             class="input-warm"
             placeholder="如有特别说明请在此填写…">
         </div>
+        <!-- 蜜罐字段：隐藏防 bot -->
+        <div style="position:absolute;left:-9999px" aria-hidden="true">
+          <input x-model="form._hp" type="text" tabindex="-1" autocomplete="off">
+        </div>
 
         <!-- 条款 -->
         <div class="bg-warm rounded-xl p-4 md:p-6 border border-[#e8e5df]">
@@ -444,12 +448,14 @@ rss: https://blog.xiaow.qzz.io/rss.xml"></textarea>
 <script>
 function app() {
   return {
-    form: { title: '', avatar: '', link: '', descr: '', rss: '', email: '', remark: '', agreed: false },
+    form: { title: '', avatar: '', link: '', descr: '', rss: '', email: '', remark: '', agreed: false, _token: '', _hp: '' },
     loading: false, success: false, error: '',
     showImport: false, importText: '', parsing: false, importMsg: '', importOk: false,
     showEmailConfirm: false,
 
-    init() {},
+    init() {
+      fetch('/api/form-token').then(r => r.json()).then(d => { this.form._token = d.token; }).catch(() => {});
+    },
 
     fillForm(title, avatar, link, descr, rss, email) {
       this.form.title = title || '';
@@ -539,6 +545,11 @@ function app() {
       this.showEmailConfirm = false;
       this.error = '';
       this.loading = true;
+      // 蜜罐检测
+      if (this.form._hp) {
+        this.loading = false;
+        return;
+      }
       try {
         const resp = await fetch('/api/submit', {
           method: 'POST',
@@ -548,6 +559,10 @@ function app() {
         const data = await resp.json();
         if (!resp.ok || data.error) {
           this.error = (data.errors && data.errors.join('；')) || data.error || '提交失败';
+          // 令牌过期 → 重新获取
+          if (resp.status === 403) {
+            fetch('/api/form-token').then(r => r.json()).then(d => { this.form._token = d.token; }).catch(() => {});
+          }
         } else {
           this.success = true;
         }
