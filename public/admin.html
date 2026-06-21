@@ -955,7 +955,6 @@ function admin() {
 
     async doReject() {
       const reason = this.rejectReasonForm.trim();
-      if (!reason) { this.showToast('请填写拒绝原因', false); return; }
       this.rejectSubmitting = true;
       try {
         const r = await this.api('/api/admin/review', {
