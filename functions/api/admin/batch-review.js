@@ -62,17 +62,6 @@ export async function onRequestPost({ request, env }) {
       rejected.push(id);
       await env.LINKS.delete(`link:pending:${id}`);
       success++;
-      if (record.email) {
-        const reasonBlock = record.rejectReason
-          ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fef2f2" style="background-color:#fef2f2;background:#fef2f2;border-radius:8px;margin:0 0 16px"><tr><td bgcolor="#fef2f2" style="background-color:#fef2f2;background:#fef2f2;padding:12px 16px"><font color="#991b1b" style="color:#991b1b">📌 拒绝原因：${escapeHtml(record.rejectReason)}</font></td></tr></table>`
-          : '';
-        const content = `<font color="#333333" style="color:#333333"><b>${escapeHtml(record.title)}</b>，很抱歉</font>
-          <font color="#6b7280" style="color:#6b7280">您的友链申请未通过审核。</font>
-          ${reasonBlock}
-          <font color="#9ca3af" style="color:#9ca3af">如果仍有疑问，可以重新提交申请</font>`;
-        await queueEmail(env, `😅 友链未通过 - ${record.title}`,
-          buildEmailHtml('❌ 未通过审核', content, '查看详情', `${new URL(request.url).origin}/check`), record.email);
-      }
     }
     await setList(env, 'link:list:rejected', rejected);
     await setList(env, 'link:list:pending', pending.filter(id => !ids.includes(id)));
