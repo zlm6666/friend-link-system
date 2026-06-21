@@ -1,6 +1,6 @@
 // functions/api/admin/ai-convert.js
 // 调用 DeepSeek 将非标准文本转换为友链结构数据
-import { ok, err, requireAdmin } from '../_utils.js';
+import { ok, err, globalRateLimit } from '../_utils.js';
 
 export async function onRequestGet() {
   return new Response(JSON.stringify({ error: '此接口需要 POST 请求' }), {
@@ -24,8 +24,13 @@ const SYSTEM_PROMPT = `你是一个严格的数据提取工具。从用户提供
 let keyIdCounter = 0;
 
 export async function onRequestPost({ request, env }) {
-  const auth = await requireAdmin(request, env);
-  if (!auth.ok) return err(auth.reason, 401);
+  // 全局限速：5 次 / 300 秒（花钱的接口，省着点）
+  if (!(await globalRateLimit(env, 'ai-convert', 5, 300))) {
+    return new Response(JSON.stringify({ error: 'AI 解析请求过于频繁，请稍后再试' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
 
   let body;
   try { body = await request.json(); } catch { return err('请求体不是 JSON'); }
